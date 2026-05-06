@@ -3,510 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SRT → STL Converter</title>
+<title>Legenda → Avid</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d0f;
-    --surface: #17171a;
-    --surface2: #1f1f24;
-    --border: #2a2a32;
-    --accent: #e8ff47;
-    --accent-dim: rgba(232,255,71,0.12);
-    --accent-dim2: rgba(232,255,71,0.06);
-    --text: #f0f0f0;
-    --text-muted: #6b6b7a;
-    --text-dim: #3a3a45;
-    --green: #47ffb8;
-    --red: #ff6b6b;
-    --mono: 'DM Mono', monospace;
-    --display: 'Syne', sans-serif;
+    --bg:#0d0d0f;--surface:#17171a;--surface2:#1f1f24;--border:#2a2a32;
+    --accent:#e8ff47;--accent-dim:rgba(232,255,71,0.12);--accent-dim2:rgba(232,255,71,0.06);
+    --text:#f0f0f0;--text-muted:#6b6b7a;--text-dim:#3a3a45;
+    --green:#47ffb8;--red:#ff6b6b;
+    --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
   }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 24px 80px;}
+  body::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(232,255,71,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+  .wrapper{width:100%;max-width:640px;position:relative;z-index:1;}
+  header{margin-bottom:48px;}
+  .badge{display:inline-block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:3px 10px;border-radius:2px;margin-bottom:16px;}
+  h1{font-family:var(--display);font-size:clamp(32px,7vw,50px);font-weight:800;line-height:1;letter-spacing:-.02em;}
+  h1 span{color:var(--accent);}
+  .subtitle{margin-top:12px;font-size:13px;color:var(--text-muted);line-height:1.6;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  #dropzone{border:1.5px dashed var(--border);border-radius:8px;padding:48px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface);position:relative;overflow:hidden;}
+  #dropzone::before{content:'';position:absolute;inset:0;background:var(--accent-dim2);opacity:0;transition:opacity .2s;}
+  #dropzone:hover,#dropzone.drag-over{border-color:var(--accent);background:var(--surface2);}
+  #dropzone:hover::before,#dropzone.drag-over::before{opacity:1;}
+  #dropzone.drag-over{border-style:solid;}
+  .drop-icon{width:40px;height:40px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
+  .drop-icon svg{width:40px;height:40px;stroke:var(--text-muted);fill:none;transition:stroke .2s;}
+  #dropzone:hover .drop-icon svg,#dropzone.drag-over .drop-icon svg{stroke:var(--accent);}
+  .drop-title{font-family:var(--display);font-size:16px;font-weight:700;margin-bottom:6px;}
+  .drop-hint{font-size:12px;color:var(--text-muted);}
+  .drop-hint strong{color:var(--accent);font-weight:400;}
+  #file-input{display:none;}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 48px 24px 80px;
-  }
+  .options{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .options-header{padding:12px 20px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--surface2);}
+  .option-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);gap:16px;}
+  .option-row:last-child{border-bottom:none;}
+  .fps-options{display:flex;gap:12px;flex-wrap:wrap;}
+  .fps-label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 14px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);transition:border-color .15s,background .15s;user-select:none;}
+  .fps-label:hover{border-color:rgba(232,255,71,.4);}
+  .fps-label input[type=radio]{display:none;}
+  .fps-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--text-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s;}
+  .fps-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .15s;}
+  .fps-label input[type=radio]:checked~.fps-dot{border-color:var(--accent);}
+  .fps-label input[type=radio]:checked~.fps-dot::after{opacity:1;}
+  .fps-label input[type=radio]:checked~.fps-text{color:var(--accent);}
+  .fps-label:has(input:checked){border-color:rgba(232,255,71,.4);background:var(--accent-dim2);}
+  .fps-text{font-size:12px;color:var(--text);transition:color .15s;line-height:1.3;}
+  .fps-text small{display:block;font-size:10px;color:var(--text-muted);margin-top:1px;}
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px; left: 50%;
-    transform: translateX(-50%);
-    width: 600px; height: 400px;
-    background: radial-gradient(ellipse, rgba(232,255,71,0.07) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  #file-info{display:none;margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;align-items:center;gap:12px;}
+  #file-info.show{display:flex;}
+  .file-icon{width:36px;height:36px;background:var(--accent-dim);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--accent);letter-spacing:.05em;font-weight:500;}
+  .file-details{flex:1;min-width:0;}
+  .file-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+  .file-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .file-clear{background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;border-radius:4px;line-height:0;transition:color .15s;}
+  .file-clear:hover{color:var(--red);}
 
-  .wrapper {
-    width: 100%;
-    max-width: 640px;
-    position: relative;
-    z-index: 1;
-  }
+  #convert-btn{width:100%;margin-top:16px;padding:16px;background:var(--accent);color:#0d0d0f;border:none;border-radius:6px;font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:opacity .15s,transform .1s;display:none;}
+  #convert-btn.show{display:block;}
+  #convert-btn:hover{opacity:.9;transform:translateY(-1px);}
+  #convert-btn:active{transform:translateY(0);}
+  #convert-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 
-  header {
-    margin-bottom: 48px;
-  }
+  #progress-bar-wrap{height:2px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden;display:none;}
+  #progress-bar-wrap.show{display:block;}
+  #progress-bar{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .1s;}
 
-  .badge {
-    display: inline-block;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    padding: 3px 10px;
-    border-radius: 2px;
-    margin-bottom: 16px;
-  }
+  #log{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;}
+  #log.show{display:block;}
+  .log-header{padding:10px 16px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);background:var(--surface2);border-bottom:1px solid var(--border);}
+  #log-body{padding:16px;max-height:200px;overflow-y:auto;font-size:12px;line-height:1.8;}
+  .log-line{display:flex;gap:10px;}
+  .log-line .ts{color:var(--text-dim);flex-shrink:0;}
+  .log-line.ok .msg{color:var(--green);}
+  .log-line.err .msg{color:var(--red);}
+  .log-line.info .msg{color:var(--text-muted);}
 
-  h1 {
-    font-family: var(--display);
-    font-size: clamp(36px, 8vw, 56px);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
+  #download-section{display:none;margin-top:20px;}
+  #download-section.show{display:block;}
+  .download-group{background:var(--accent-dim);border:1px solid rgba(232,255,71,.3);border-radius:8px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:10px;}
+  .download-group:last-child{margin-bottom:0;}
+  .download-info{flex:1;}
+  .download-title{font-family:var(--display);font-weight:700;font-size:14px;color:var(--accent);margin-bottom:2px;}
+  .download-desc{font-size:11px;color:var(--text-muted);}
+  .dl-btn{background:var(--accent);color:#0d0d0f;border:none;padding:10px 20px;border-radius:4px;font-family:var(--display);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;}
+  .dl-btn:hover{opacity:.85;}
 
-  h1 span {
-    color: var(--accent);
-  }
-
-  .subtitle {
-    margin-top: 12px;
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-
-  /* Drop zone */
-  #dropzone {
-    border: 1.5px dashed var(--border);
-    border-radius: 8px;
-    padding: 48px 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    background: var(--surface);
-    position: relative;
-    overflow: hidden;
-  }
-
-  #dropzone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--accent-dim2);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  #dropzone:hover, #dropzone.drag-over {
-    border-color: var(--accent);
-    background: var(--surface2);
-  }
-
-  #dropzone:hover::before, #dropzone.drag-over::before {
-    opacity: 1;
-  }
-
-  #dropzone.drag-over {
-    border-style: solid;
-  }
-
-  .drop-icon {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .drop-icon svg {
-    width: 40px;
-    height: 40px;
-    stroke: var(--text-muted);
-    fill: none;
-    transition: stroke 0.2s;
-  }
-
-  #dropzone:hover .drop-icon svg,
-  #dropzone.drag-over .drop-icon svg {
-    stroke: var(--accent);
-  }
-
-  .drop-title {
-    font-family: var(--display);
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-
-  .drop-hint {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .drop-hint strong {
-    color: var(--accent);
-    font-weight: 400;
-  }
-
-  #file-input { display: none; }
-
--top: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .options-header {
-    padding: 12px 20px;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-  }
-
-  .option-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    gap: 16px;
-  }
-
-  .option-row:last-child { border-bottom: none; }
-
-  .option-label {
-    font-size: 12px;
-    color: var(--text);
-  }
-
-  .option-desc {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  .fps-options {
-    display: flex;
-    gap: 12px;
-  }
-
-  .fps-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 7px 14px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    transition: border-color 0.15s, background 0.15s;
-    user-select: none;
-  }
-
-  .fps-label:hover {
-    border-color: rgba(232,255,71,0.4);
-  }
-
-  .fps-label input[type="radio"] {
-    display: none;
-  }
-
-  .fps-dot {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 1.5px solid var(--text-muted);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: border-color 0.15s;
-  }
-
-  .fps-dot::after {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-
-  .fps-label input[type="radio"]:checked ~ .fps-dot {
-    border-color: var(--accent);
-  }
-
-  .fps-label input[type="radio"]:checked ~ .fps-dot::after {
-    opacity: 1;
-  }
-
-  .fps-label input[type="radio"]:checked ~ .fps-text {
-    color: var(--accent);
-  }
-
-  .fps-label:has(input:checked) {
-    border-color: rgba(232,255,71,0.4);
-    background: var(--accent-dim2);
-  }
-
-  .fps-text {
-    font-size: 12px;
-    color: var(--text);
-    transition: color 0.15s;
-    line-height: 1.3;
-  }
-
-  .fps-text small {
-    display: block;
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 1px;
-  }
-
-  /* File loaded state */
-  #file-info {
-    display: none;
-    margin-top: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    align-items: center;
-    gap: 12px;
-  }
-
-  #file-info.show { display: flex; }
-
-  .file-icon {
-    width: 36px; height: 36px;
-    background: var(--accent-dim);
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.05em;
-    font-weight: 500;
-  }
-
-  .file-details { flex: 1; min-width: 0; }
-
-  .file-name {
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text);
-  }
-
-  .file-meta {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  .file-clear {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 4px;
-    border-radius: 4px;
-    line-height: 0;
-    transition: color 0.15s;
-  }
-  .file-clear:hover { color: var(--red); }
-
-  /* Convert button */
-  #convert-btn {
-    width: 100%;
-    margin-top: 16px;
-    padding: 16px;
-    background: var(--accent);
-    color: #0d0d0f;
-    border: none;
-    border-radius: 6px;
-    font-family: var(--display);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    display: none;
-  }
-
-  #convert-btn.show { display: block; }
-  #convert-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  #convert-btn:active { transform: translateY(0); }
-  #convert-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  /* Log / output */
-  #log {
-    margin-top: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    display: none;
-  }
-  #log.show { display: block; }
-
-  .log-header {
-    padding: 10px 16px;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-
-  #log-body {
-    padding: 16px;
-    max-height: 200px;
-    overflow-y: auto;
-    font-size: 12px;
-    line-height: 1.8;
-  }
-
-  .log-line { display: flex; gap: 10px; }
-  .log-line .ts { color: var(--text-dim); flex-shrink: 0; }
-  .log-line.ok .msg { color: var(--green); }
-  .log-line.err .msg { color: var(--red); }
-  .log-line.info .msg { color: var(--text-muted); }
-
-  /* Download section */
-  #download-section {
-    display: none;
-    margin-top: 20px;
-    padding: 20px;
-    background: var(--accent-dim);
-    border: 1px solid rgba(232,255,71,0.3);
-    border-radius: 8px;
-    align-items: center;
-    gap: 16px;
-  }
-  #download-section.show { display: flex; }
-
-  .download-info { flex: 1; }
-  .download-title {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--accent);
-    margin-bottom: 2px;
-  }
-  .download-meta { font-size: 11px; color: var(--text-muted); }
-
-  #download-btn {
-    background: var(--accent);
-    color: #0d0d0f;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: opacity 0.15s;
-    flex-shrink: 0;
-  }
-  #download-btn:hover { opacity: 0.85; }
-
-  /* Footer */
-  footer {
-    margin-top: 56px;
-    font-size: 11px;
-    color: var(--text-dim);
-    text-align: center;
-    line-height: 1.8;
-  }
-
-  footer a { color: var(--text-muted); text-decoration: none; }
-  footer a:hover { color: var(--text); }
-
-  .divider {
-    width: 1px;
-    height: 12px;
-    background: var(--border);
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 8px;
-  }
-
-  /* Progress bar */
-  #progress-bar-wrap {
-    height: 2px;
-    background: var(--border);
-    border-radius: 2px;
-    margin-top: 12px;
-    overflow: hidden;
-    display: none;
-  }
-  #progress-bar-wrap.show { display: block; }
-  #progress-bar {
-    height: 100%;
-    width: 0%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.1s;
-  }
+  footer{margin-top:56px;font-size:11px;color:var(--text-dim);text-align:center;line-height:1.8;}
 </style>
 </head>
 <body>
 <div class="wrapper">
 
   <header>
-    <div class="badge">EBU Tech 3264</div>
-    <h1>SRT <span>→</span> STL</h1>
+    <div class="badge">Avid Caption</div>
+    <h1>Legenda <span>→</span> Avid</h1>
     <p class="subtitle">
-      Conversão local, sem servidor, sem conta.<br>
-      O arquivo nunca sai do seu navegador.
+      Converte SRT, TXT e STL para os formatos do Avid.<br>
+      Processamento local — o arquivo nunca sai do navegador.
     </p>
   </header>
 
-  <!-- Drop zone -->
   <div id="dropzone" onclick="document.getElementById('file-input').click()">
-    <input type="file" id="file-input" accept=".srt,.txt,text/plain">
+    <input type="file" id="file-input" accept=".srt,.txt,.stl">
     <div class="drop-icon">
       <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 16V4M12 4l-4 4M12 4l4 4"/>
         <path d="M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4"/>
       </svg>
     </div>
-    <div class="drop-title">Arraste o arquivo .srt ou .txt aqui</div>
-    <div class="drop-hint">ou <strong>clique para selecionar</strong></div>
+    <div class="drop-title">Arraste o arquivo aqui</div>
+    <div class="drop-hint">.srt &nbsp;·&nbsp; .txt &nbsp;·&nbsp; .stl &nbsp;&nbsp;|&nbsp;&nbsp; ou <strong>clique para selecionar</strong></div>
   </div>
 
-  <!-- Options -->
   <div class="options">
     <div class="options-header">Frame rate</div>
     <div class="option-row">
       <div class="fps-options">
         <label class="fps-label">
-          <input type="radio" name="fps" id="fps-23976" value="23976" checked>
+          <input type="radio" name="fps" value="23976" checked>
           <span class="fps-dot"></span>
           <span class="fps-text">23.976 fps<small>padrão</small></span>
         </label>
         <label class="fps-label">
-          <input type="radio" name="fps" id="fps-2997df" value="2997df">
+          <input type="radio" name="fps" value="2997df">
           <span class="fps-dot"></span>
           <span class="fps-text">29.97 fps<small>drop frame</small></span>
         </label>
@@ -514,412 +137,352 @@
     </div>
   </div>
 
-  <!-- File info -->
   <div id="file-info">
-    <div class="file-icon" id="file-icon-label">SRT</div>
+    <div class="file-icon" id="file-icon-label">—</div>
     <div class="file-details">
       <div class="file-name" id="file-name-label">—</div>
       <div class="file-meta" id="file-meta-label">—</div>
     </div>
-    <button class="file-clear" id="file-clear-btn" title="Remover arquivo">
+    <button class="file-clear" id="file-clear-btn" title="Remover">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
         <path d="M4 4l8 8M12 4l-8 8"/>
       </svg>
     </button>
   </div>
 
-  <!-- Progress -->
   <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <button id="convert-btn">Converter</button>
 
-  <!-- Convert button -->
-  <button id="convert-btn">Converter para STL</button>
-
-  <!-- Log -->
   <div id="log">
-    <div class="log-header">Log de conversão</div>
+    <div class="log-header">Log</div>
     <div id="log-body"></div>
   </div>
 
-  <!-- Download -->
   <div id="download-section">
-    <div class="download-info">
-      <div class="download-title" id="dl-filename">arquivo.stl</div>
-      <div class="download-meta" id="dl-meta">—</div>
+    <div class="download-group">
+      <div class="download-info">
+        <div class="download-title">STL — EBU N19</div>
+        <div class="download-desc" id="stl-desc">EBU 3264 · compatível com Avid Media Composer</div>
+      </div>
+      <button class="dl-btn" id="dl-stl-btn">↓ Baixar STL</button>
     </div>
-    <button id="download-btn">↓ Baixar STL</button>
+    <div class="download-group">
+      <div class="download-info">
+        <div class="download-title">TXT — Avid Caption</div>
+        <div class="download-desc" id="txt-desc">UTF-16 LE · Avid Caption Plugin v1</div>
+      </div>
+      <button class="dl-btn" id="dl-txt-btn">↓ Baixar TXT</button>
+    </div>
   </div>
 
   <footer>
-    EBU Tech 3264 · Conversão 100% local · Sem servidor<br>
-    <span class="divider"></span>
-    Compatível com Avid Media Composer e sistemas de broadcast PAL/NTSC
+    Avid Media Composer · EBU Tech 3264 · 100% local · sem servidor
   </footer>
 
 </div>
-
 <script>
-// ─── State ────────────────────────────────────────────────────────────────────
-let loadedFile = null;
-let stlBlob = null;
-let stlFilename = '';
+// ── State ─────────────────────────────────────────────────────────────────────
+let loadedFile=null, stlBlob=null, txtBlob=null, baseName='';
 
-// ─── DOM refs ─────────────────────────────────────────────────────────────────
-const dropzone       = document.getElementById('dropzone');
-const fileInput      = document.getElementById('file-input');
-const fileInfo       = document.getElementById('file-info');
-const fileNameLabel  = document.getElementById('file-name-label');
-const fileMetaLabel  = document.getElementById('file-meta-label');
-const fileClearBtn   = document.getElementById('file-clear-btn');
-const convertBtn     = document.getElementById('convert-btn');
-const progressWrap   = document.getElementById('progress-bar-wrap');
-const progressBar    = document.getElementById('progress-bar');
-const logEl          = document.getElementById('log');
-const logBody        = document.getElementById('log-body');
-const dlSection      = document.getElementById('download-section');
-const dlFilename     = document.getElementById('dl-filename');
-const dlMeta         = document.getElementById('dl-meta');
-const downloadBtn    = document.getElementById('download-btn');
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dropzone=document.getElementById('dropzone');
+const fileInput=document.getElementById('file-input');
+const fileInfo=document.getElementById('file-info');
+const fileIconLabel=document.getElementById('file-icon-label');
+const fileNameLabel=document.getElementById('file-name-label');
+const fileMetaLabel=document.getElementById('file-meta-label');
+const fileClearBtn=document.getElementById('file-clear-btn');
+const convertBtn=document.getElementById('convert-btn');
+const progressWrap=document.getElementById('progress-bar-wrap');
+const progressBar=document.getElementById('progress-bar');
+const logEl=document.getElementById('log');
+const logBody=document.getElementById('log-body');
+const dlSection=document.getElementById('download-section');
+const stlDesc=document.getElementById('stl-desc');
+const txtDesc=document.getElementById('txt-desc');
+const dlStlBtn=document.getElementById('dl-stl-btn');
+const dlTxtBtn=document.getElementById('dl-txt-btn');
 
-// ─── Drag & drop ──────────────────────────────────────────────────────────────
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-dropzone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropzone.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f) loadFile(f);
-});
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
+// ── Drag & drop ───────────────────────────────────────────────────────────────
+dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag-over');});
+dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)loadFile(f);});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])loadFile(fileInput.files[0]);});
 
-function loadFile(f) {
-  if (!f.name.toLowerCase().match(/\.(srt|txt)$/) && f.type !== 'text/plain') {
-    alert('Por favor, selecione um arquivo .srt ou .txt');
-    return;
-  }
-  loadedFile = f;
-  const ext = f.name.split('.').pop().toUpperCase();
-  document.getElementById('file-icon-label').textContent = ext;
-  fileNameLabel.textContent = f.name;
-  fileMetaLabel.textContent = formatBytes(f.size);
+function loadFile(f){
+  const ext=f.name.split('.').pop().toLowerCase();
+  if(!['srt','txt','stl'].includes(ext)){alert('Selecione um arquivo .srt, .txt ou .stl');return;}
+  loadedFile=f;
+  fileIconLabel.textContent=ext.toUpperCase();
+  fileNameLabel.textContent=f.name;
+  fileMetaLabel.textContent=formatBytes(f.size);
   fileInfo.classList.add('show');
   convertBtn.classList.add('show');
   logEl.classList.remove('show');
   dlSection.classList.remove('show');
   progressWrap.classList.remove('show');
-  logBody.innerHTML = '';
-  stlBlob = null;
+  logBody.innerHTML='';
+  stlBlob=null;txtBlob=null;
 }
 
-fileClearBtn.addEventListener('click', e => {
+fileClearBtn.addEventListener('click',e=>{
   e.stopPropagation();
-  loadedFile = null;
-  fileInput.value = '';
+  loadedFile=null;fileInput.value='';
   fileInfo.classList.remove('show');
   convertBtn.classList.remove('show');
   logEl.classList.remove('show');
   dlSection.classList.remove('show');
   progressWrap.classList.remove('show');
-  logBody.innerHTML = '';
-  stlBlob = null;
+  logBody.innerHTML='';
+  stlBlob=null;txtBlob=null;
 });
 
-// ─── Convert ──────────────────────────────────────────────────────────────────
-convertBtn.addEventListener('click', async () => {
-  if (!loadedFile) return;
-  convertBtn.disabled = true;
+// ── Convert ───────────────────────────────────────────────────────────────────
+convertBtn.addEventListener('click',async()=>{
+  if(!loadedFile)return;
+  convertBtn.disabled=true;
   logEl.classList.add('show');
-  logBody.innerHTML = '';
+  logBody.innerHTML='';
   dlSection.classList.remove('show');
   progressWrap.classList.add('show');
   setProgress(5);
-
-  try {
-    const text = await loadedFile.text();
+  try{
+    const ext=loadedFile.name.split('.').pop().toLowerCase();
+    baseName=loadedFile.name.replace(/\.[^.]+$/,'');
+    const fps=document.querySelector('input[name="fps"]:checked').value;
+    const fpsLbl=fps==='23976'?'23.976 fps':'29.97 fps DF';
+    addLog('info',`Lendo: ${loadedFile.name} (${formatBytes(loadedFile.size)})`);
     setProgress(15);
-    addLog('info', `Lendo: ${loadedFile.name} (${formatBytes(loadedFile.size)})`);
 
-    const subtitles = parseSRT(text);
-    addLog('info', `${subtitles.length} legendas encontradas`);
+    let subtitles;
+    if(ext==='stl'){
+      const buf=await loadedFile.arrayBuffer();
+      subtitles=parseSTL(buf);
+      addLog('info',`STL lido: ${subtitles.length} legendas`);
+    } else {
+      const text=await loadedFile.text();
+      subtitles=parseSRT(text);
+      addLog('info',`${subtitles.length} legendas encontradas`);
+    }
+
+    if(!subtitles||subtitles.length===0)throw new Error('Nenhuma legenda encontrada no arquivo.');
     setProgress(35);
+    addLog('info',`Frame rate: ${fpsLbl}`);
+    setProgress(50);
 
-    if (subtitles.length === 0) throw new Error('Nenhuma legenda encontrada no arquivo SRT.');
-
-  const fps     = getFPS();
-  const lang    = '21'; // Português fixo
-  const title   = '';
-
-  addLog('info', `Frame rate: ${fpsLabel()}`);
-  setProgress(50);
-
-  const stlData = buildSTL(subtitles, fps, lang, title);
+    stlBlob=new Blob([buildSTL(subtitles,fps)],{type:'application/octet-stream'});
+    setProgress(75);
+    txtBlob=new Blob([buildAvidTXT(subtitles,fps)],{type:'text/plain'});
     setProgress(90);
 
-    stlBlob = new Blob([stlData], { type: 'application/octet-stream' });
-    stlFilename = loadedFile.name.replace(/\.srt$/i, '') + '.stl';
-
-    dlFilename.textContent = stlFilename;
-    dlMeta.textContent = `${subtitles.length} legendas · ${formatBytes(stlBlob.size)} · EBU 3264`;
+    stlDesc.textContent=`${subtitles.length} legendas · ${formatBytes(stlBlob.size)} · EBU 3264`;
+    txtDesc.textContent=`${subtitles.length} legendas · ${formatBytes(txtBlob.size)} · UTF-16 LE`;
     dlSection.classList.add('show');
-
-    addLog('ok', `Conversão concluída — ${stlFilename} pronto para download`);
+    addLog('ok',`Conversão concluída — ${subtitles.length} legendas`);
     setProgress(100);
-  } catch(err) {
-    addLog('err', 'Erro: ' + err.message);
+  }catch(err){
+    addLog('err','Erro: '+err.message);
     setProgress(0);
   }
-
-  convertBtn.disabled = false;
+  convertBtn.disabled=false;
 });
 
-downloadBtn.addEventListener('click', () => {
-  if (!stlBlob) return;
-  const url = URL.createObjectURL(stlBlob);
-  const a = document.createElement('a');
-  a.href = url; a.download = stlFilename;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-});
+dlStlBtn.addEventListener('click',()=>{if(stlBlob)dlFile(stlBlob,baseName+'.stl');});
+dlTxtBtn.addEventListener('click',()=>{if(txtBlob)dlFile(txtBlob,baseName+'.txt');});
 
-// ─── SRT Parser ───────────────────────────────────────────────────────────────
-function parseSRT(text) {
-  const subs = [];
-  // Normalize line endings and split on blank lines
-  const blocks = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split(/\n\s*\n/);
+function dlFile(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 
-  for (const block of blocks) {
-    const lines = block.trim().split('\n');
-    if (lines.length < 3) continue;
-
-    // Skip sequence number line
-    let i = 0;
-    if (/^\d+$/.test(lines[0].trim())) i = 1;
-
-    // Parse timecode line
-    const tcLine = lines[i];
-    const tcMatch = tcLine.match(
-      /(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/
-    );
-    if (!tcMatch) continue;
-
-    const tcIn  = { h: +tcMatch[1], m: +tcMatch[2], s: +tcMatch[3], ms: +tcMatch[4] };
-    const tcOut = { h: +tcMatch[5], m: +tcMatch[6], s: +tcMatch[7], ms: +tcMatch[8] };
-
-    // Remove tags SSA {..} e HTML <..> — o Avid exibe texto puro
-    const textLines = lines.slice(i + 1)
-      .map(l => l.replace(/\{[^}]*\}/g, '').replace(/<[^>]+>/g, '').trim())
-      .filter(l => l.length > 0);
-
-    if (textLines.length === 0) continue;
-
-    subs.push({ tcIn, tcOut, lines: textLines });
+// ── SRT Parser ────────────────────────────────────────────────────────────────
+function parseSRT(text){
+  const subs=[];
+  const blocks=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim().split(/\n\s*\n/);
+  for(const block of blocks){
+    const lines=block.trim().split('\n');
+    if(lines.length<3)continue;
+    let i=0;
+    if(/^\d+$/.test(lines[0].trim()))i=1;
+    const m=lines[i].match(/(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/);
+    if(!m)continue;
+    const textLines=lines.slice(i+1)
+      .map(l=>l.replace(/\{[^}]*\}/g,'').replace(/<[^>]+>/g,'').trim())
+      .filter(l=>l.length>0);
+    if(!textLines.length)continue;
+    subs.push({tcIn:{h:+m[1],m:+m[2],s:+m[3],ms:+m[4]},tcOut:{h:+m[5],m:+m[6],s:+m[7],ms:+m[8]},lines:textLines});
   }
-
   return subs;
 }
 
-// ─── STL Builder (EBU Tech 3264) ──────────────────────────────────────────────
-function buildSTL(subtitles, fps, langCode, progTitle) {
-  const gsiSize  = 1024;
-  const ttiSize  = 128;
-  const totalTTI = subtitles.length;
-  const buf = new Uint8Array(gsiSize + totalTTI * ttiSize);
-  // Inicializado com 0x00 (como Subtitle Edit)
-
-  // ── GSI Block ─────────────────────────────────────────────────────────────
-  // CPN: '850' — offset 0
-  buf[0]=0x38; buf[1]=0x35; buf[2]=0x30;
-  // DFC: zeros — offset 3 (Avid não usa)
-  // DSC: 0x00 — offset 11
-  // CCT: '00' — offset 12
-  buf[12]=0x30; buf[13]=0x30;
-  // LC: '09' (English) — offset 14
-  buf[14]=0x30; buf[15]=0x39;
-  // OPT..SLR, CD, RD, RN: zeros
-  // TNB — offset 238, 5 bytes ASCII
-  const tnbStr = String(totalTTI).padStart(5,'0');
-  for (let i=0;i<5;i++) buf[238+i]=tnbStr.charCodeAt(i);
-  // TNS — offset 243
-  for (let i=0;i<5;i++) buf[243+i]=tnbStr.charCodeAt(i);
-  // TNG — offset 248: '001'
-  buf[248]=0x30; buf[249]=0x30; buf[250]=0x31;
-  // MNC, MNR, TC, TCP, TCF: zeros
-  // TCS — offset 272: '1'
-  buf[272]=0x31;
-  // DNS — offset 273: '1'
-  buf[273]=0x31;
-  // CO, PUB, EN, ECD, UDA: zeros
-
-  // ── TTI Blocks ────────────────────────────────────────────────────────────
-  for (let i = 0; i < subtitles.length; i++) {
-    const sub = subtitles[i];
-    const off = gsiSize + i * ttiSize;
-
-    // Preenche bloco inteiro com 0x8F (end-of-text)
-    buf.fill(0x8F, off, off + ttiSize);
-
-    // SGN: byte[0]=0x00, byte[1]=índice
-    buf[off+0] = 0x00;
-    buf[off+1] = i & 0xFF;
-
-    // SN: byte[2] = índice >> 8, byte[3] = 0xFF
-    buf[off+2] = (i >> 8) & 0xFF;
-    buf[off+3] = 0xFF;
-
-    // EBN: 0x00
-    buf[off+4] = 0x00;
-    // CS: 0x00
-    buf[off+5] = 0x00;
-
-    // TCI: [M, S, F, 0x00]  (layout confirmado no arquivo de referência)
-    buf[off+6]  = sub.tcIn.m;
-    buf[off+7]  = sub.tcIn.s;
-    buf[off+8]  = msToFrames(sub.tcIn.ms, fps);
-    buf[off+9]  = 0x00;
-
-    // TCO: [M, S, F, 0x01]
-    buf[off+10] = sub.tcOut.m;
-    buf[off+11] = sub.tcOut.s;
-    buf[off+12] = msToFrames(sub.tcOut.ms, fps);
-    buf[off+13] = 0x01;
-
-    // VP: 2
-    buf[off+14] = 2;
-    // JC: 0x00
-    buf[off+15] = 0x00;
-
-    // TF: começa no offset 16
-    let tfPos = off + 16;
-    const tfEnd = off + ttiSize;
-    for (let li = 0; li < sub.lines.length; li++) {
-      if (li > 0 && tfPos < tfEnd-1) buf[tfPos++] = 0x8A; // CR/LF
-      for (const b of textToCP850(sub.lines[li])) {
-        if (tfPos >= tfEnd-1) break;
-        buf[tfPos++] = b;
+// ── STL Parser (EBU 3264) ─────────────────────────────────────────────────────
+function parseSTL(buffer){
+  const buf=new Uint8Array(buffer);
+  const subs=[];
+  const n=Math.floor((buf.length-1024)/128);
+  for(let i=0;i<n;i++){
+    const off=1024+i*128;
+    const mIn=buf[off+6],sIn=buf[off+7],fIn=buf[off+8];
+    const mOut=buf[off+10],sOut=buf[off+11],fOut=buf[off+12];
+    // Decodifica TF com ISO 6937
+    const tf=buf.slice(off+16,off+128);
+    const lines=[];
+    let line='';
+    for(let j=0;j<tf.length;j++){
+      const b=tf[j];
+      if(b===0x8F)break;
+      if(b===0x8A){lines.push(line);line='';continue;}
+      if(b>=0xC0&&b<=0xCF&&j+1<tf.length&&tf[j+1]!==0x8F){
+        line+=iso6937Decode(b,tf[j+1]);j++;continue;
       }
+      line+=String.fromCharCode(b<0x80?b:b);
     }
-    while (tfPos < tfEnd) buf[tfPos++] = 0x8F;
+    if(line.length>0)lines.push(line);
+    if(!lines.length)continue;
+    const msIn=Math.round((fIn/24)*1000);
+    const msOut=Math.round((fOut/24)*1000);
+    subs.push({tcIn:{h:0,m:mIn,s:sIn,ms:msIn},tcOut:{h:0,m:mOut,s:sOut,ms:msOut},lines});
   }
+  return subs;
+}
 
+function iso6937Decode(d,base){
+  const b=String.fromCharCode(base);
+  const m={
+    0xC1:{A:'À',a:'à',E:'È',e:'è',I:'Ì',i:'ì',O:'Ò',o:'ò',U:'Ù',u:'ù'},
+    0xC2:{A:'Á',a:'á',E:'É',e:'é',I:'Í',i:'í',O:'Ó',o:'ó',U:'Ú',u:'ú',Y:'Ý',y:'ý'},
+    0xC3:{A:'Â',a:'â',E:'Ê',e:'ê',I:'Î',i:'î',O:'Ô',o:'ô',U:'Û',u:'û'},
+    0xC4:{A:'Ã',a:'ã',N:'Ñ',n:'ñ',O:'Õ',o:'õ'},
+    0xC8:{A:'Ä',a:'ä',E:'Ë',e:'ë',I:'Ï',i:'ï',O:'Ö',o:'ö',U:'Ü',u:'ü',y:'ÿ'},
+    0xCB:{C:'Ç',c:'ç'},0xCA:{A:'Å',a:'å'},
+  };
+  return(m[d]&&m[d][b])?m[d][b]:b;
+}
+
+// ── STL Builder (EBU 3264) ────────────────────────────────────────────────────
+function buildSTL(subtitles,fps){
+  const buf=new Uint8Array(1024+subtitles.length*128);
+  // GSI
+  buf[0]=0x38;buf[1]=0x35;buf[2]=0x30;
+  buf[12]=0x30;buf[13]=0x30;
+  buf[14]=0x30;buf[15]=0x39;
+  const tnb=String(subtitles.length).padStart(5,'0');
+  for(let i=0;i<5;i++){buf[238+i]=tnb.charCodeAt(i);buf[243+i]=tnb.charCodeAt(i);}
+  buf[248]=0x30;buf[249]=0x30;buf[250]=0x31;
+  buf[272]=0x31;buf[273]=0x31;
+  // TTI
+  for(let i=0;i<subtitles.length;i++){
+    const sub=subtitles[i],off=1024+i*128;
+    buf.fill(0x8F,off,off+128);
+    buf[off+0]=0x00;buf[off+1]=i&0xFF;
+    buf[off+2]=(i>>8)&0xFF;buf[off+3]=0xFF;
+    buf[off+4]=0x00;buf[off+5]=0x00;
+    buf[off+6]=sub.tcIn.m;buf[off+7]=sub.tcIn.s;buf[off+8]=msToFrames(sub.tcIn.ms,fps);buf[off+9]=0x00;
+    buf[off+10]=sub.tcOut.m;buf[off+11]=sub.tcOut.s;buf[off+12]=msToFrames(sub.tcOut.ms,fps);buf[off+13]=0x01;
+    buf[off+14]=2;buf[off+15]=0x00;
+    let p=off+16;const end=off+128;
+    for(let li=0;li<sub.lines.length;li++){
+      if(li>0&&p<end-1)buf[p++]=0x8A;
+      for(const b of textToISO6937(sub.lines[li])){if(p>=end-1)break;buf[p++]=b;}
+    }
+    while(p<end)buf[p++]=0x8F;
+  }
   return buf.buffer;
 }
 
-// ─── ISO 6937 text encoding (EBU 3264 nativo) ───────────────────────────────
-// ISO 6937 usa sequências de 2 bytes para acentos (diacrítico + base)
-function textToCP850(str) {
-  // Mapa unicode -> bytes ISO 6937
-  const iso6937 = {
-    // Grave (0xC1 + base)
-    0xC0:[0xC1,0x41], 0xE0:[0xC1,0x61], // À à
-    0xC8:[0xC1,0x45], 0xE8:[0xC1,0x65], // È è
-    0xCC:[0xC1,0x49], 0xEC:[0xC1,0x69], // Ì ì
-    0xD2:[0xC1,0x4F], 0xF2:[0xC1,0x6F], // Ò ò
-    0xD9:[0xC1,0x55], 0xF9:[0xC1,0x75], // Ù ù
-    // Agudo (0xC2 + base)
-    0xC1:[0xC2,0x41], 0xE1:[0xC2,0x61], // Á á
-    0xC9:[0xC2,0x45], 0xE9:[0xC2,0x65], // É é
-    0xCD:[0xC2,0x49], 0xED:[0xC2,0x69], // Í í
-    0xD3:[0xC2,0x4F], 0xF3:[0xC2,0x6F], // Ó ó
-    0xDA:[0xC2,0x55], 0xFA:[0xC2,0x75], // Ú ú
-    0xDD:[0xC2,0x59], 0xFD:[0xC2,0x79], // Ý ý
-    // Circunflexo (0xC3 + base)
-    0xC2:[0xC3,0x41], 0xE2:[0xC3,0x61], // Â â
-    0xCA:[0xC3,0x45], 0xEA:[0xC3,0x65], // Ê ê
-    0xCE:[0xC3,0x49], 0xEE:[0xC3,0x69], // Î î
-    0xD4:[0xC3,0x4F], 0xF4:[0xC3,0x6F], // Ô ô
-    0xDB:[0xC3,0x55], 0xFB:[0xC3,0x75], // Û û
-    // Til (0xC4 + base)
-    0xC3:[0xC4,0x41], 0xE3:[0xC4,0x61], // Ã ã
-    0xD1:[0xC4,0x4E], 0xF1:[0xC4,0x6E], // Ñ ñ
-    0xD5:[0xC4,0x4F], 0xF5:[0xC4,0x6F], // Õ õ
-    // Trema (0xC8 + base)
-    0xC4:[0xC8,0x41], 0xE4:[0xC8,0x61], // Ä ä
-    0xCB:[0xC8,0x45], 0xEB:[0xC8,0x65], // Ë ë
-    0xCF:[0xC8,0x49], 0xEF:[0xC8,0x69], // Ï ï
-    0xD6:[0xC8,0x4F], 0xF6:[0xC8,0x6F], // Ö ö
-    0xDC:[0xC8,0x55], 0xFC:[0xC8,0x75], // Ü ü
-    0x178:[0xC8,0x59], 0xFF:[0xC8,0x79], // Ÿ ÿ
-    // Cedilha (0xCB + base)
-    0xC7:[0xCB,0x43], 0xE7:[0xCB,0x63], // Ç ç
-    // Ring (0xCA + base)
-    0xC5:[0xCA,0x41], 0xE5:[0xCA,0x61], // Å å
-    // Caracteres especiais ISO 6937 diretos
-    0x2026:[0x2E,0x2E,0x2E], // … -> ...
-    0x2013:[0x2D],            // – -> -
-    0x2014:[0x2D],            // — -> -
-    0x2018:[0x27],            // ' -> '
-    0x2019:[0x27],            // ' -> '
-    0x201C:[0x22],            // " -> "
-    0x201D:[0x22],            // " -> "
-    0x2022:[0x2A],            // • -> *
+// ── Text normalizer (para TXT Avid — converte chars Unicode para ASCII equivalente)
+function normalizeText(s){
+  return s
+    .replace(/…/g,'...')   // … -> ...
+    .replace(/[–—]/g,'-') // – — -> -
+    .replace(/[‘’]/g,"'") // '' -> '
+    .replace(/[“”]/g,'"') // "" -> "
+    .replace(/•/g,'*');    // • -> *
+}
+
+// ── Avid TXT Builder ──────────────────────────────────────────────────────────
+function buildAvidTXT(subtitles,fps){
+  const lines=[];
+  lines.push('@ This file written with the Avid Caption plugin, version 1');
+  lines.push('');
+  lines.push('<begin subtitles>');
+  for(const sub of subtitles){
+    const ti=`${pad2(sub.tcIn.h)}:${pad2(sub.tcIn.m)}:${pad2(sub.tcIn.s)}:${pad2(msToFrames(sub.tcIn.ms,fps))}`;
+    const to=`${pad2(sub.tcOut.h)}:${pad2(sub.tcOut.m)}:${pad2(sub.tcOut.s)}:${pad2(msToFrames(sub.tcOut.ms,fps))}`;
+    lines.push(`${ti} ${to}`);
+    for(const l of sub.lines)lines.push(normalizeText(l));
+    lines.push('');
+  }
+  lines.push('<end subtitles>');
+  lines.push('');
+  const text=lines.join('\r\n');
+  // UTF-16 LE com BOM
+  const bom=new Uint8Array([0xFF,0xFE]);
+  const u16=new Uint16Array(text.length);
+  for(let i=0;i<text.length;i++)u16[i]=text.charCodeAt(i);
+  const body=new Uint8Array(u16.buffer);
+  const result=new Uint8Array(bom.length+body.length);
+  result.set(bom,0);result.set(body,bom.length);
+  return result.buffer;
+}
+
+// ── ISO 6937 Encoder ──────────────────────────────────────────────────────────
+function textToISO6937(str){
+  const map={
+    0xC0:[0xC1,0x41],0xE0:[0xC1,0x61],0xC8:[0xC1,0x45],0xE8:[0xC1,0x65],
+    0xCC:[0xC1,0x49],0xEC:[0xC1,0x69],0xD2:[0xC1,0x4F],0xF2:[0xC1,0x6F],
+    0xD9:[0xC1,0x55],0xF9:[0xC1,0x75],
+    0xC1:[0xC2,0x41],0xE1:[0xC2,0x61],0xC9:[0xC2,0x45],0xE9:[0xC2,0x65],
+    0xCD:[0xC2,0x49],0xED:[0xC2,0x69],0xD3:[0xC2,0x4F],0xF3:[0xC2,0x6F],
+    0xDA:[0xC2,0x55],0xFA:[0xC2,0x75],0xDD:[0xC2,0x59],0xFD:[0xC2,0x79],
+    0xC2:[0xC3,0x41],0xE2:[0xC3,0x61],0xCA:[0xC3,0x45],0xEA:[0xC3,0x65],
+    0xCE:[0xC3,0x49],0xEE:[0xC3,0x69],0xD4:[0xC3,0x4F],0xF4:[0xC3,0x6F],
+    0xDB:[0xC3,0x55],0xFB:[0xC3,0x75],
+    0xC3:[0xC4,0x41],0xE3:[0xC4,0x61],0xD1:[0xC4,0x4E],0xF1:[0xC4,0x6E],
+    0xD5:[0xC4,0x4F],0xF5:[0xC4,0x6F],
+    0xC4:[0xC8,0x41],0xE4:[0xC8,0x61],0xCB:[0xC8,0x45],0xEB:[0xC8,0x65],
+    0xCF:[0xC8,0x49],0xEF:[0xC8,0x69],0xD6:[0xC8,0x4F],0xF6:[0xC8,0x6F],
+    0xDC:[0xC8,0x55],0xFC:[0xC8,0x75],0xFF:[0xC8,0x79],
+    0xC7:[0xCB,0x43],0xE7:[0xCB,0x63],
+    0xC5:[0xCA,0x41],0xE5:[0xCA,0x61],
+    0x2026:[0x2E,0x2E,0x2E],
+    0x2013:[0x2D],0x2014:[0x2D],
+    0x2018:[0x27],0x2019:[0x27],
+    0x201C:[0x22],0x201D:[0x22],
+    0x2022:[0x2A],
   };
-  const out = [];
-  for (let i = 0; i < str.length; i++) {
-    const c = str.charCodeAt(i);
-    if (c < 0x80) {
-      out.push(c);
-    } else if (iso6937[c] !== undefined) {
-      for (const b of iso6937[c]) out.push(b);
-    } else if (c <= 0xFF) {
-      out.push(c); // Latin-1 direto para chars sem mapeamento especial
-    } else {
-      out.push(0x3F); // '?' para chars fora do range
-    }
+  const out=[];
+  for(let i=0;i<str.length;i++){
+    const c=str.charCodeAt(i);
+    if(c<0x80)out.push(c);
+    else if(map[c])for(const b of map[c])out.push(b);
+    else if(c<=0xFF)out.push(c);
+    else out.push(0x3F);
   }
   return out;
 }
 
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function strToBytes(str, len) {
-  const arr = new Uint8Array(len).fill(0x20);
-  for (let i = 0; i < Math.min(str.length, len); i++) {
-    arr[i] = str.charCodeAt(i) & 0xFF;
-  }
-  return arr;
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function msToFrames(ms,fps){
+  const fExact=(fps==='23976')?24000/1001:30000/1001;
+  const fMax=(fps==='23976')?24:30;
+  const exact=(ms/1000)*fExact;
+  return(exact>=fMax-0.5)?fMax-1:Math.round(exact)%fMax;
 }
-
-function msToFrames(ms, fps) {
-  // Taxa exata: 23.976 = 24000/1001, 29.97DF = 30000/1001
-  const fExact = (fps === '23976') ? 24000/1001 : 30000/1001;
-  const fMax   = (fps === '23976') ? 24 : 30;
-  const exact  = (ms / 1000) * fExact;
-  // Clamp: evita overflow onde round(exact) == fMax
-  return (exact >= fMax - 0.5) ? fMax - 1 : Math.round(exact) % fMax;
-}
-
-function getFPS() {
-  return document.querySelector('input[name="fps"]:checked').value;
-}
-
-function fpsLabel() {
-  return getFPS() === '23976' ? '23.976 fps' : '29.97 fps drop frame';
-}
-
-function pad2(n) { return String(n).padStart(2, '0'); }
-
-function formatBytes(b) {
-  if (b < 1024) return b + ' B';
-  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
-  return (b/1048576).toFixed(2) + ' MB';
-}
-
-function addLog(type, msg) {
-  const now = new Date();
-  const ts  = pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
-  const div = document.createElement('div');
-  div.className = 'log-line ' + type;
-  div.innerHTML = `<span class="ts">${ts}</span><span class="msg">${escapeHtml(msg)}</span>`;
+function pad2(n){return String(n).padStart(2,'0');}
+function formatBytes(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed(1)+' KB';return (b/1048576).toFixed(2)+' MB';}
+function addLog(type,msg){
+  const now=new Date();
+  const ts=`${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+  const div=document.createElement('div');
+  div.className='log-line '+type;
+  div.innerHTML=`<span class="ts">${ts}</span><span class="msg">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
   logBody.appendChild(div);
-  logBody.scrollTop = logBody.scrollHeight;
+  logBody.scrollTop=logBody.scrollHeight;
 }
-
-function escapeHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function setProgress(pct) {
-  progressBar.style.width = pct + '%';
-}
+function setProgress(pct){progressBar.style.width=pct+'%';}
 </script>
 </body>
 </html>
