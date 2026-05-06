@@ -9,43 +9,47 @@
   :root {
     --bg:#0d0d0f;--surface:#17171a;--surface2:#1f1f24;--border:#2a2a32;
     --accent:#e8ff47;--accent-dim:rgba(232,255,71,0.12);--accent-dim2:rgba(232,255,71,0.06);
-    --text:#f0f0f0;--text-muted:#6b6b7a;--text-dim:#3a3a45;
+    --text:#f0f0f0;
+    --text-muted:#a0998f;
+    --text-dim:#5a5450;
     --green:#47ffb8;--red:#ff6b6b;
     --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+    --c-control:#e8ff47;--c-normal:#8ab4f8;--c-italic:#c084fc;
+    --c-bold:#f97316;--c-top:#4ade80;--c-ib:#facc15;
+    --c-it:#f472b6;--c-bt:#f87171;--c-ibt:#94a3b8;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 24px 80px;}
   body::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(232,255,71,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
-  .wrapper{width:100%;max-width:640px;position:relative;z-index:1;}
-  header{margin-bottom:48px;}
+  .wrapper{width:100%;max-width:660px;position:relative;z-index:1;}
+  header{margin-bottom:40px;}
   .badge{display:inline-block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:3px 10px;border-radius:2px;margin-bottom:16px;}
   h1{font-family:var(--display);font-size:clamp(32px,7vw,50px);font-weight:800;line-height:1;letter-spacing:-.02em;}
   h1 span{color:var(--accent);}
   .subtitle{margin-top:12px;font-size:13px;color:var(--text-muted);line-height:1.6;}
 
-  #dropzone{border:1.5px dashed var(--border);border-radius:8px;padding:48px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface);position:relative;overflow:hidden;}
+  #dropzone{border:1.5px dashed var(--border);border-radius:8px;padding:40px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface);position:relative;overflow:hidden;}
   #dropzone::before{content:'';position:absolute;inset:0;background:var(--accent-dim2);opacity:0;transition:opacity .2s;}
   #dropzone:hover,#dropzone.drag-over{border-color:var(--accent);background:var(--surface2);}
   #dropzone:hover::before,#dropzone.drag-over::before{opacity:1;}
   #dropzone.drag-over{border-style:solid;}
-  .drop-icon{width:40px;height:40px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
-  .drop-icon svg{width:40px;height:40px;stroke:var(--text-muted);fill:none;transition:stroke .2s;}
+  .drop-icon{width:36px;height:36px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;}
+  .drop-icon svg{width:36px;height:36px;stroke:var(--text-muted);fill:none;transition:stroke .2s;}
   #dropzone:hover .drop-icon svg,#dropzone.drag-over .drop-icon svg{stroke:var(--accent);}
-  .drop-title{font-family:var(--display);font-size:16px;font-weight:700;margin-bottom:6px;}
+  .drop-title{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:5px;color:var(--text);}
   .drop-hint{font-size:12px;color:var(--text-muted);}
   .drop-hint strong{color:var(--accent);font-weight:400;}
   #file-input{display:none;}
 
-  .options{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-  .options-header{padding:12px 20px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--surface2);}
-  .option-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);gap:16px;}
-  .option-row:last-child{border-bottom:none;}
-  .fps-options{display:flex;gap:12px;flex-wrap:wrap;}
-  .fps-label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 14px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);transition:border-color .15s,background .15s;user-select:none;}
+  .options{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .options-header{padding:10px 18px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--surface2);}
+  .option-row{display:flex;align-items:center;padding:12px 18px;gap:16px;}
+  .fps-options{display:flex;gap:10px;flex-wrap:wrap;}
+  .fps-label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);transition:border-color .15s,background .15s;user-select:none;}
   .fps-label:hover{border-color:rgba(232,255,71,.4);}
   .fps-label input[type=radio]{display:none;}
-  .fps-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--text-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s;}
-  .fps-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .15s;}
+  .fps-dot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--text-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s;}
+  .fps-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .15s;}
   .fps-label input[type=radio]:checked~.fps-dot{border-color:var(--accent);}
   .fps-label input[type=radio]:checked~.fps-dot::after{opacity:1;}
   .fps-label input[type=radio]:checked~.fps-text{color:var(--accent);}
@@ -53,44 +57,65 @@
   .fps-text{font-size:12px;color:var(--text);transition:color .15s;line-height:1.3;}
   .fps-text small{display:block;font-size:10px;color:var(--text-muted);margin-top:1px;}
 
-  #file-info{display:none;margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;align-items:center;gap:12px;}
+  #file-info{display:none;margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;align-items:center;gap:12px;}
   #file-info.show{display:flex;}
-  .file-icon{width:36px;height:36px;background:var(--accent-dim);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--accent);letter-spacing:.05em;font-weight:500;}
+  .file-icon{width:34px;height:34px;background:var(--accent-dim);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:var(--accent);letter-spacing:.05em;font-weight:500;}
   .file-details{flex:1;min-width:0;}
   .file-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
   .file-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
   .file-clear{background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;border-radius:4px;line-height:0;transition:color .15s;}
   .file-clear:hover{color:var(--red);}
 
-  #convert-btn{width:100%;margin-top:16px;padding:16px;background:var(--accent);color:#0d0d0f;border:none;border-radius:6px;font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:opacity .15s,transform .1s;display:none;}
+  #convert-btn{width:100%;margin-top:14px;padding:15px;background:var(--accent);color:#0d0d0f;border:none;border-radius:6px;font-family:var(--display);font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;display:none;letter-spacing:-.01em;}
   #convert-btn.show{display:block;}
   #convert-btn:hover{opacity:.9;transform:translateY(-1px);}
   #convert-btn:active{transform:translateY(0);}
   #convert-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 
-  #progress-bar-wrap{height:2px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden;display:none;}
+  #progress-bar-wrap{height:2px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden;display:none;}
   #progress-bar-wrap.show{display:block;}
-  #progress-bar{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .1s;}
+  #progress-bar{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .15s;}
 
-  #log{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;}
+  #log{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;}
   #log.show{display:block;}
-  .log-header{padding:10px 16px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);background:var(--surface2);border-bottom:1px solid var(--border);}
-  #log-body{padding:16px;max-height:200px;overflow-y:auto;font-size:12px;line-height:1.8;}
+  .log-header{padding:9px 16px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);background:var(--surface2);border-bottom:1px solid var(--border);}
+  #log-body{padding:14px 16px;max-height:160px;overflow-y:auto;font-size:11px;line-height:1.9;}
   .log-line{display:flex;gap:10px;}
-  .log-line .ts{color:var(--text-dim);flex-shrink:0;}
-  .log-line.ok .msg{color:var(--green);}
-  .log-line.err .msg{color:var(--red);}
-  .log-line.info .msg{color:var(--text-muted);}
+  .log-ts{color:var(--text-dim);flex-shrink:0;}
+  .log-ok{color:var(--green);}
+  .log-err{color:var(--red);}
+  .log-info{color:var(--text-muted);}
 
-  #download-section{display:none;margin-top:20px;}
+  #tc-info{display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:16px 18px;}
+  #tc-info.show{display:block;}
+  .tc-info-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  .tc-info-value{font-size:22px;font-family:var(--display);font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:.02em;}
+  .tc-info-note{font-size:12px;color:var(--text-muted);line-height:1.6;}
+
+  #explainer{display:none;margin-top:16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+  #explainer.show{display:block;}
+  .explainer-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+  .explainer-text{font-size:12px;color:var(--text-muted);line-height:1.75;}
+  .explainer-text strong{color:var(--text);font-weight:500;}
+
+  #download-section{display:none;margin-top:16px;}
   #download-section.show{display:block;}
-  .download-group{background:var(--accent-dim);border:1px solid rgba(232,255,71,.3);border-radius:8px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:10px;}
-  .download-group:last-child{margin-bottom:0;}
-  .download-info{flex:1;}
-  .download-title{font-family:var(--display);font-weight:700;font-size:14px;color:var(--accent);margin-bottom:2px;}
-  .download-desc{font-size:11px;color:var(--text-muted);}
-  .dl-btn{background:var(--accent);color:#0d0d0f;border:none;padding:10px 20px;border-radius:4px;font-family:var(--display);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;}
-  .dl-btn:hover{opacity:.85;}
+
+  .dl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .dl-section-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);}
+  #btn-all{font-family:var(--display);font-size:12px;font-weight:700;background:var(--accent);color:#0d0d0f;border:none;padding:6px 14px;border-radius:5px;cursor:pointer;transition:opacity .15s;}
+  #btn-all:hover{opacity:.85;}
+
+  .dl-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:border-color .15s;}
+  .dl-item:last-child{margin-bottom:0;}
+  .dl-item:hover{border-color:#3a3a44;}
+  .dl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .dl-info{flex:1;min-width:0;}
+  .dl-name{font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+  .dl-count{font-size:12px;color:var(--text-muted);}
+  .dl-count strong{color:var(--text);font-size:14px;font-family:var(--display);font-weight:700;margin-right:3px;}
+  .dl-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:4px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:border-color .15s,color .15s;flex-shrink:0;white-space:nowrap;}
+  .dl-btn:hover{border-color:var(--accent);color:var(--accent);}
 
   footer{margin-top:56px;font-size:11px;color:var(--text-dim);text-align:center;line-height:1.8;}
 </style>
@@ -102,7 +127,7 @@
     <div class="badge">Avid Caption</div>
     <h1>Legenda <span>→</span> Avid</h1>
     <p class="subtitle">
-      Converte SRT, TXT e STL para os formatos do Avid.<br>
+      Converte SRT e TXT em STL separado por formatação.<br>
       Processamento local — o arquivo nunca sai do navegador.
     </p>
   </header>
@@ -144,7 +169,7 @@
       <div class="file-meta" id="file-meta-label">—</div>
     </div>
     <button class="file-clear" id="file-clear-btn" title="Remover">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M4 4l8 8M12 4l-8 8"/>
       </svg>
     </button>
@@ -158,21 +183,23 @@
     <div id="log-body"></div>
   </div>
 
+  <div id="tc-info">
+    <div class="tc-info-title">Timecode inicial da legenda</div>
+    <div class="tc-info-value" id="tc-info-value">—</div>
+    <div class="tc-info-note" id="tc-info-note">—</div>
+  </div>
+
+  <div id="explainer">
+    <div class="explainer-title">Como usar no Avid</div>
+    <div class="explainer-text" id="explainer-text"></div>
+  </div>
+
   <div id="download-section">
-    <div class="download-group">
-      <div class="download-info">
-        <div class="download-title">STL — EBU N19</div>
-        <div class="download-desc" id="stl-desc">EBU 3264 · compatível com Avid Media Composer</div>
-      </div>
-      <button class="dl-btn" id="dl-stl-btn">↓ Baixar STL</button>
+    <div class="dl-header">
+      <span class="dl-section-title" id="dl-count-label">Arquivos gerados</span>
+      <button id="btn-all">↓ Baixar todos</button>
     </div>
-    <div class="download-group">
-      <div class="download-info">
-        <div class="download-title">TXT — Avid Caption</div>
-        <div class="download-desc" id="txt-desc">UTF-16 LE · Avid Caption Plugin v1</div>
-      </div>
-      <button class="dl-btn" id="dl-txt-btn">↓ Baixar TXT</button>
-    </div>
+    <div id="dl-list"></div>
   </div>
 
   <footer>
@@ -182,26 +209,44 @@
 </div>
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
-let loadedFile=null, stlBlob=null, txtBlob=null, baseName='';
+let loadedFile = null;
+let baseName   = '';
+let generatedGroups = [];
+
+const GROUP_DEFS = [
+  { key:'control',         label:'Legenda geral (controle)',              suffix:'_legenda_geral_controle',                      color:'var(--c-control)' },
+  { key:'normal',          label:'Legendas normais',                      suffix:'_legendas_normais',                            color:'var(--c-normal)'  },
+  { key:'italic',          label:'Legendas em itálico',                   suffix:'_legendas_em_italico',                         color:'var(--c-italic)'  },
+  { key:'bold',            label:'Legendas em negrito',                   suffix:'_legendas_em_negrito',                         color:'var(--c-bold)'    },
+  { key:'top',             label:'Legendas superiores',                   suffix:'_legendas_superiores',                         color:'var(--c-top)'     },
+  { key:'italic_bold',     label:'Legendas itálico + negrito',            suffix:'_legendas_em_italico_negrito',                 color:'var(--c-ib)'      },
+  { key:'italic_top',      label:'Legendas itálico + superior',           suffix:'_legendas_em_italico_superiores',              color:'var(--c-it)'      },
+  { key:'bold_top',        label:'Legendas negrito + superior',           suffix:'_legendas_em_negrito_superiores',              color:'var(--c-bt)'      },
+  { key:'italic_bold_top', label:'Legendas itálico + negrito + superior', suffix:'_legendas_em_italico_negrito_superiores',      color:'var(--c-ibt)'     },
+];
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
-const dropzone=document.getElementById('dropzone');
-const fileInput=document.getElementById('file-input');
-const fileInfo=document.getElementById('file-info');
-const fileIconLabel=document.getElementById('file-icon-label');
-const fileNameLabel=document.getElementById('file-name-label');
-const fileMetaLabel=document.getElementById('file-meta-label');
-const fileClearBtn=document.getElementById('file-clear-btn');
-const convertBtn=document.getElementById('convert-btn');
-const progressWrap=document.getElementById('progress-bar-wrap');
-const progressBar=document.getElementById('progress-bar');
-const logEl=document.getElementById('log');
-const logBody=document.getElementById('log-body');
-const dlSection=document.getElementById('download-section');
-const stlDesc=document.getElementById('stl-desc');
-const txtDesc=document.getElementById('txt-desc');
-const dlStlBtn=document.getElementById('dl-stl-btn');
-const dlTxtBtn=document.getElementById('dl-txt-btn');
+const dropzone      = document.getElementById('dropzone');
+const fileInput     = document.getElementById('file-input');
+const fileInfo      = document.getElementById('file-info');
+const fileIconLabel = document.getElementById('file-icon-label');
+const fileNameLabel = document.getElementById('file-name-label');
+const fileMetaLabel = document.getElementById('file-meta-label');
+const fileClearBtn  = document.getElementById('file-clear-btn');
+const convertBtn    = document.getElementById('convert-btn');
+const progressWrap  = document.getElementById('progress-bar-wrap');
+const progressBar   = document.getElementById('progress-bar');
+const logEl         = document.getElementById('log');
+const logBody       = document.getElementById('log-body');
+const tcInfo        = document.getElementById('tc-info');
+const tcInfoValue   = document.getElementById('tc-info-value');
+const tcInfoNote    = document.getElementById('tc-info-note');
+const explainerEl   = document.getElementById('explainer');
+const explainerText = document.getElementById('explainer-text');
+const dlSection     = document.getElementById('download-section');
+const dlCountLabel  = document.getElementById('dl-count-label');
+const dlList        = document.getElementById('dl-list');
+const btnAll        = document.getElementById('btn-all');
 
 // ── Drag & drop ───────────────────────────────────────────────────────────────
 dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag-over');});
@@ -209,8 +254,8 @@ dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over')
 dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)loadFile(f);});
 fileInput.addEventListener('change',()=>{if(fileInput.files[0])loadFile(fileInput.files[0]);});
 
-function loadFile(f){
-  const ext=f.name.split('.').pop().toLowerCase();
+function loadFile(f) {
+  const ext = f.name.split('.').pop().toLowerCase();
   if(!['srt','txt','stl'].includes(ext)){alert('Selecione um arquivo .srt, .txt ou .stl');return;}
   loadedFile=f;
   fileIconLabel.textContent=ext.toUpperCase();
@@ -218,77 +263,149 @@ function loadFile(f){
   fileMetaLabel.textContent=formatBytes(f.size);
   fileInfo.classList.add('show');
   convertBtn.classList.add('show');
-  logEl.classList.remove('show');
-  dlSection.classList.remove('show');
-  progressWrap.classList.remove('show');
-  logBody.innerHTML='';
-  stlBlob=null;txtBlob=null;
+  resetResults();
 }
 
 fileClearBtn.addEventListener('click',e=>{
   e.stopPropagation();
-  loadedFile=null;fileInput.value='';
+  loadedFile=null; fileInput.value='';
   fileInfo.classList.remove('show');
   convertBtn.classList.remove('show');
-  logEl.classList.remove('show');
-  dlSection.classList.remove('show');
-  progressWrap.classList.remove('show');
-  logBody.innerHTML='';
-  stlBlob=null;txtBlob=null;
+  resetResults();
 });
 
+function resetResults() {
+  logEl.classList.remove('show');
+  dlSection.classList.remove('show');
+  tcInfo.classList.remove('show');
+  explainerEl.classList.remove('show');
+  progressWrap.classList.remove('show');
+  progressBar.style.width='0';
+  logBody.innerHTML='';
+  dlList.innerHTML='';
+  generatedGroups=[];
+}
+
 // ── Convert ───────────────────────────────────────────────────────────────────
-convertBtn.addEventListener('click',async()=>{
-  if(!loadedFile)return;
+convertBtn.addEventListener('click', async () => {
+  if(!loadedFile) return;
   convertBtn.disabled=true;
   logEl.classList.add('show');
   logBody.innerHTML='';
   dlSection.classList.remove('show');
+  tcInfo.classList.remove('show');
+  explainerEl.classList.remove('show');
   progressWrap.classList.add('show');
   setProgress(5);
-  try{
-    const ext=loadedFile.name.split('.').pop().toLowerCase();
-    baseName=loadedFile.name.replace(/\.[^.]+$/,'');
-    const fps=document.querySelector('input[name="fps"]:checked').value;
-    const fpsLbl=fps==='23976'?'23.976 fps':'29.97 fps DF';
-    addLog('info',`Lendo: ${loadedFile.name} (${formatBytes(loadedFile.size)})`);
+
+  try {
+    const ext  = loadedFile.name.split('.').pop().toLowerCase();
+    baseName   = loadedFile.name.replace(/\.[^.]+$/,'');
+    const fps  = document.querySelector('input[name="fps"]:checked').value;
+    const fpsL = fps==='23976'?'23.976 fps':'29.97 fps DF';
+
+    addLog('info',`${loadedFile.name} — ${formatBytes(loadedFile.size)}`);
     setProgress(15);
 
     let subtitles;
     if(ext==='stl'){
-      const buf=await loadedFile.arrayBuffer();
-      subtitles=parseSTL(buf);
-      addLog('info',`STL lido: ${subtitles.length} legendas`);
+      subtitles=parseSTL(await loadedFile.arrayBuffer());
+      addLog('info',`STL: ${subtitles.length} legendas`);
     } else {
-      const text=await loadedFile.text();
-      subtitles=parseSRT(text);
-      addLog('info',`${subtitles.length} legendas encontradas`);
+      subtitles=parseSRT(await loadedFile.text());
+      addLog('info',`${subtitles.length} legendas · ${fpsL}`);
     }
 
-    if(!subtitles||subtitles.length===0)throw new Error('Nenhuma legenda encontrada no arquivo.');
-    setProgress(35);
-    addLog('info',`Frame rate: ${fpsLbl}`);
+    if(!subtitles||subtitles.length===0) throw new Error('Nenhuma legenda encontrada.');
+    setProgress(30);
+
+    // Classifica
+    const buckets={};
+    GROUP_DEFS.forEach(g=>buckets[g.key]=[]);
+    for(const sub of subtitles){
+      buckets['control'].push(sub);
+      buckets[groupKey(sub)].push(sub);
+    }
     setProgress(50);
 
-    stlBlob=new Blob([buildSTL(subtitles,fps)],{type:'application/octet-stream'});
+    // Gera STLs
+    generatedGroups=[];
+    for(const def of GROUP_DEFS){
+      const subs=buckets[def.key];
+      if(def.key==='control'||subs.length>0){
+        const blob=new Blob([buildSTL(subs,fps)],{type:'application/octet-stream'});
+        generatedGroups.push({...def,subs,blob});
+        if(def.key!=='control') addLog('info',`${def.label}: ${subs.length} legenda${subs.length!==1?'s':''}`);
+      }
+    }
     setProgress(75);
-    txtBlob=new Blob([buildAvidTXT(subtitles,fps)],{type:'text/plain'});
-    setProgress(90);
 
-    stlDesc.textContent=`${subtitles.length} legendas · ${formatBytes(stlBlob.size)} · EBU 3264`;
-    txtDesc.textContent=`${subtitles.length} legendas · ${formatBytes(txtBlob.size)} · UTF-16 LE`;
+    // TC inicial
+    const first=subtitles[0].tcIn;
+    tcInfoValue.textContent=`${pad2(first.h)}:${pad2(first.m)}:${pad2(first.s)}:${pad2(msToFrames(first.ms,fps))}`;
+    tcInfoNote.textContent=first.h===0
+      ?'A primeira legenda começa próxima de 00:00:00:00. A timeline do projeto provavelmente começa em zero — confirme antes de importar.'
+      :`A primeira legenda começa em ${first.h}h. A timeline provavelmente começa em ${pad2(first.h)}:00:00:00 (padrão Media Composer) — confirme o TC de início antes de importar.`;
+    tcInfo.classList.add('show');
+
+    // Explainer
+    const trackNames=generatedGroups.filter(g=>g.key!=='control').map(g=>`<strong>${g.label}</strong>`);
+    explainerText.innerHTML=
+      `O arquivo foi dividido em <strong>${trackNames.length} track${trackNames.length!==1?'s':''}</strong>`+
+      (trackNames.length?': '+trackNames.join(', ')+'. ':'. ')+
+      `O arquivo <strong>legenda geral controle</strong> contém todas as legendas e serve de referência. `+
+      `No Avid, crie uma track de caption por arquivo, importe cada STL na track correspondente `+
+      `e aplique a formatação em lote selecionando todas as legendas da track.`;
+    explainerEl.classList.add('show');
+
+    // Lista downloads
+    dlList.innerHTML='';
+    dlCountLabel.textContent=`${generatedGroups.length} arquivo${generatedGroups.length!==1?'s':''} gerado${generatedGroups.length!==1?'s':''}`;
+    for(const g of generatedGroups){
+      const filename=baseName+g.suffix+'.stl';
+      const item=document.createElement('div');
+      item.className='dl-item';
+      item.innerHTML=`
+        <div class="dl-dot" style="background:${g.color}"></div>
+        <div class="dl-info">
+          <div class="dl-name">${filename}</div>
+          <div class="dl-count"><strong>${g.subs.length}</strong>legenda${g.subs.length!==1?'s':''}</div>
+        </div>
+        <button class="dl-btn">↓ STL</button>
+      `;
+      item.querySelector('.dl-btn').addEventListener('click',()=>dlFile(g.blob,filename));
+      dlList.appendChild(item);
+    }
     dlSection.classList.add('show');
-    addLog('ok',`Conversão concluída — ${subtitles.length} legendas`);
     setProgress(100);
-  }catch(err){
+    addLog('ok',`Conversão concluída — ${generatedGroups.length} arquivo${generatedGroups.length!==1?'s':''}`);
+
+  } catch(err){
     addLog('err','Erro: '+err.message);
     setProgress(0);
   }
   convertBtn.disabled=false;
 });
 
-dlStlBtn.addEventListener('click',()=>{if(stlBlob)dlFile(stlBlob,baseName+'.stl');});
-dlTxtBtn.addEventListener('click',()=>{if(txtBlob)dlFile(txtBlob,baseName+'.txt');});
+// ── Baixar todos ──────────────────────────────────────────────────────────────
+btnAll.addEventListener('click',()=>{
+  generatedGroups.forEach((g,idx)=>{
+    setTimeout(()=>dlFile(g.blob,baseName+g.suffix+'.stl'), idx*400);
+  });
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function groupKey(sub){
+  const i=sub.hasItalic,b=sub.hasBold,t=sub.hasTop;
+  if(!i&&!b&&!t)return'normal';
+  if( i&&!b&&!t)return'italic';
+  if(!i&& b&&!t)return'bold';
+  if(!i&&!b&& t)return'top';
+  if( i&& b&&!t)return'italic_bold';
+  if( i&&!b&& t)return'italic_top';
+  if(!i&& b&& t)return'bold_top';
+  return'italic_bold_top';
+}
 
 function dlFile(blob,filename){
   const url=URL.createObjectURL(blob);
@@ -308,76 +425,56 @@ function parseSRT(text){
     if(/^\d+$/.test(lines[0].trim()))i=1;
     const m=lines[i].match(/(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/);
     if(!m)continue;
-    const textLines=lines.slice(i+1)
-      .map(l=>l.replace(/\{[^}]*\}/g,'').replace(/<[^>]+>/g,'').trim())
-      .filter(l=>l.length>0);
+    const rawLines=lines.slice(i+1).filter(l=>l.trim().length>0);
+    const rawText=rawLines.join('\n');
+    const hasItalic=/<i>/i.test(rawText);
+    const hasBold=/<b>/i.test(rawText);
+    const hasTop=/\{\\an8\}/i.test(rawText);
+    const textLines=rawLines.map(l=>l.replace(/\{[^}]*\}/g,'').replace(/<[^>]+>/g,'').trim()).filter(l=>l.length>0);
     if(!textLines.length)continue;
-    subs.push({tcIn:{h:+m[1],m:+m[2],s:+m[3],ms:+m[4]},tcOut:{h:+m[5],m:+m[6],s:+m[7],ms:+m[8]},lines:textLines});
+    subs.push({tcIn:{h:+m[1],m:+m[2],s:+m[3],ms:+m[4]},tcOut:{h:+m[5],m:+m[6],s:+m[7],ms:+m[8]},lines:textLines,hasItalic,hasBold,hasTop});
   }
   return subs;
 }
 
-// ── STL Parser (EBU 3264) ─────────────────────────────────────────────────────
+// ── STL Parser ────────────────────────────────────────────────────────────────
 function parseSTL(buffer){
-  const buf=new Uint8Array(buffer);
-  const subs=[];
-  const n=Math.floor((buf.length-1024)/128);
+  const buf=new Uint8Array(buffer);const subs=[];const n=Math.floor((buf.length-1024)/128);
   for(let i=0;i<n;i++){
     const off=1024+i*128;
     const mIn=buf[off+6],sIn=buf[off+7],fIn=buf[off+8];
     const mOut=buf[off+10],sOut=buf[off+11],fOut=buf[off+12];
-    // Decodifica TF com ISO 6937
-    const tf=buf.slice(off+16,off+128);
-    const lines=[];
-    let line='';
+    const tf=buf.slice(off+16,off+128);const lines=[];let line='';
     for(let j=0;j<tf.length;j++){
-      const b=tf[j];
-      if(b===0x8F)break;
+      const b=tf[j];if(b===0x8F)break;
       if(b===0x8A){lines.push(line);line='';continue;}
-      if(b>=0xC0&&b<=0xCF&&j+1<tf.length&&tf[j+1]!==0x8F){
-        line+=iso6937Decode(b,tf[j+1]);j++;continue;
-      }
-      line+=String.fromCharCode(b<0x80?b:b);
+      if(b>=0xC0&&b<=0xCF&&j+1<tf.length&&tf[j+1]!==0x8F){line+=iso6937Decode(b,tf[j+1]);j++;continue;}
+      line+=String.fromCharCode(b);
     }
     if(line.length>0)lines.push(line);
     if(!lines.length)continue;
-    const msIn=Math.round((fIn/24)*1000);
-    const msOut=Math.round((fOut/24)*1000);
-    subs.push({tcIn:{h:0,m:mIn,s:sIn,ms:msIn},tcOut:{h:0,m:mOut,s:sOut,ms:msOut},lines});
+    subs.push({tcIn:{h:0,m:mIn,s:sIn,ms:Math.round((fIn/24)*1000)},tcOut:{h:0,m:mOut,s:sOut,ms:Math.round((fOut/24)*1000)},lines,hasItalic:false,hasBold:false,hasTop:false});
   }
   return subs;
 }
 
 function iso6937Decode(d,base){
   const b=String.fromCharCode(base);
-  const m={
-    0xC1:{A:'À',a:'à',E:'È',e:'è',I:'Ì',i:'ì',O:'Ò',o:'ò',U:'Ù',u:'ù'},
-    0xC2:{A:'Á',a:'á',E:'É',e:'é',I:'Í',i:'í',O:'Ó',o:'ó',U:'Ú',u:'ú',Y:'Ý',y:'ý'},
-    0xC3:{A:'Â',a:'â',E:'Ê',e:'ê',I:'Î',i:'î',O:'Ô',o:'ô',U:'Û',u:'û'},
-    0xC4:{A:'Ã',a:'ã',N:'Ñ',n:'ñ',O:'Õ',o:'õ'},
-    0xC8:{A:'Ä',a:'ä',E:'Ë',e:'ë',I:'Ï',i:'ï',O:'Ö',o:'ö',U:'Ü',u:'ü',y:'ÿ'},
-    0xCB:{C:'Ç',c:'ç'},0xCA:{A:'Å',a:'å'},
-  };
+  const m={0xC1:{A:'À',a:'à',E:'È',e:'è',I:'Ì',i:'ì',O:'Ò',o:'ò',U:'Ù',u:'ù'},0xC2:{A:'Á',a:'á',E:'É',e:'é',I:'Í',i:'í',O:'Ó',o:'ó',U:'Ú',u:'ú',Y:'Ý',y:'ý'},0xC3:{A:'Â',a:'â',E:'Ê',e:'ê',I:'Î',i:'î',O:'Ô',o:'ô',U:'Û',u:'û'},0xC4:{A:'Ã',a:'ã',N:'Ñ',n:'ñ',O:'Õ',o:'õ'},0xC8:{A:'Ä',a:'ä',E:'Ë',e:'ë',I:'Ï',i:'ï',O:'Ö',o:'ö',U:'Ü',u:'ü',y:'ÿ'},0xCB:{C:'Ç',c:'ç'},0xCA:{A:'Å',a:'å'}};
   return(m[d]&&m[d][b])?m[d][b]:b;
 }
 
-// ── STL Builder (EBU 3264) ────────────────────────────────────────────────────
+// ── STL Builder ───────────────────────────────────────────────────────────────
 function buildSTL(subtitles,fps){
   const buf=new Uint8Array(1024+subtitles.length*128);
-  // GSI
-  buf[0]=0x38;buf[1]=0x35;buf[2]=0x30;
-  buf[12]=0x30;buf[13]=0x30;
-  buf[14]=0x30;buf[15]=0x39;
+  buf[0]=0x38;buf[1]=0x35;buf[2]=0x30;buf[12]=0x30;buf[13]=0x30;buf[14]=0x30;buf[15]=0x39;
   const tnb=String(subtitles.length).padStart(5,'0');
   for(let i=0;i<5;i++){buf[238+i]=tnb.charCodeAt(i);buf[243+i]=tnb.charCodeAt(i);}
-  buf[248]=0x30;buf[249]=0x30;buf[250]=0x31;
-  buf[272]=0x31;buf[273]=0x31;
-  // TTI
+  buf[248]=0x30;buf[249]=0x30;buf[250]=0x31;buf[272]=0x31;buf[273]=0x31;
   for(let i=0;i<subtitles.length;i++){
     const sub=subtitles[i],off=1024+i*128;
     buf.fill(0x8F,off,off+128);
-    buf[off+0]=0x00;buf[off+1]=i&0xFF;
-    buf[off+2]=(i>>8)&0xFF;buf[off+3]=0xFF;
+    buf[off+0]=0x00;buf[off+1]=i&0xFF;buf[off+2]=(i>>8)&0xFF;buf[off+3]=0xFF;
     buf[off+4]=0x00;buf[off+5]=0x00;
     buf[off+6]=sub.tcIn.m;buf[off+7]=sub.tcIn.s;buf[off+8]=msToFrames(sub.tcIn.ms,fps);buf[off+9]=0x00;
     buf[off+10]=sub.tcOut.m;buf[off+11]=sub.tcOut.s;buf[off+12]=msToFrames(sub.tcOut.ms,fps);buf[off+13]=0x01;
@@ -392,79 +489,13 @@ function buildSTL(subtitles,fps){
   return buf.buffer;
 }
 
-// ── Text normalizer (para TXT Avid — converte chars Unicode para ASCII equivalente)
-function normalizeText(s){
-  return s
-    .replace(/…/g,'...')   // … -> ...
-    .replace(/[–—]/g,'-') // – — -> -
-    .replace(/[‘’]/g,"'") // '' -> '
-    .replace(/[“”]/g,'"') // "" -> "
-    .replace(/•/g,'*');    // • -> *
-}
-
-// ── Avid TXT Builder ──────────────────────────────────────────────────────────
-function buildAvidTXT(subtitles,fps){
-  const lines=[];
-  lines.push('@ This file written with the Avid Caption plugin, version 1');
-  lines.push('');
-  lines.push('<begin subtitles>');
-  for(const sub of subtitles){
-    const ti=`${pad2(sub.tcIn.h)}:${pad2(sub.tcIn.m)}:${pad2(sub.tcIn.s)}:${pad2(msToFrames(sub.tcIn.ms,fps))}`;
-    const to=`${pad2(sub.tcOut.h)}:${pad2(sub.tcOut.m)}:${pad2(sub.tcOut.s)}:${pad2(msToFrames(sub.tcOut.ms,fps))}`;
-    lines.push(`${ti} ${to}`);
-    for(const l of sub.lines)lines.push(normalizeText(l));
-    lines.push('');
-  }
-  lines.push('<end subtitles>');
-  lines.push('');
-  const text=lines.join('\r\n');
-  // UTF-16 LE com BOM
-  const bom=new Uint8Array([0xFF,0xFE]);
-  const u16=new Uint16Array(text.length);
-  for(let i=0;i<text.length;i++)u16[i]=text.charCodeAt(i);
-  const body=new Uint8Array(u16.buffer);
-  const result=new Uint8Array(bom.length+body.length);
-  result.set(bom,0);result.set(body,bom.length);
-  return result.buffer;
-}
-
-// ── ISO 6937 Encoder ──────────────────────────────────────────────────────────
 function textToISO6937(str){
-  const map={
-    0xC0:[0xC1,0x41],0xE0:[0xC1,0x61],0xC8:[0xC1,0x45],0xE8:[0xC1,0x65],
-    0xCC:[0xC1,0x49],0xEC:[0xC1,0x69],0xD2:[0xC1,0x4F],0xF2:[0xC1,0x6F],
-    0xD9:[0xC1,0x55],0xF9:[0xC1,0x75],
-    0xC1:[0xC2,0x41],0xE1:[0xC2,0x61],0xC9:[0xC2,0x45],0xE9:[0xC2,0x65],
-    0xCD:[0xC2,0x49],0xED:[0xC2,0x69],0xD3:[0xC2,0x4F],0xF3:[0xC2,0x6F],
-    0xDA:[0xC2,0x55],0xFA:[0xC2,0x75],0xDD:[0xC2,0x59],0xFD:[0xC2,0x79],
-    0xC2:[0xC3,0x41],0xE2:[0xC3,0x61],0xCA:[0xC3,0x45],0xEA:[0xC3,0x65],
-    0xCE:[0xC3,0x49],0xEE:[0xC3,0x69],0xD4:[0xC3,0x4F],0xF4:[0xC3,0x6F],
-    0xDB:[0xC3,0x55],0xFB:[0xC3,0x75],
-    0xC3:[0xC4,0x41],0xE3:[0xC4,0x61],0xD1:[0xC4,0x4E],0xF1:[0xC4,0x6E],
-    0xD5:[0xC4,0x4F],0xF5:[0xC4,0x6F],
-    0xC4:[0xC8,0x41],0xE4:[0xC8,0x61],0xCB:[0xC8,0x45],0xEB:[0xC8,0x65],
-    0xCF:[0xC8,0x49],0xEF:[0xC8,0x69],0xD6:[0xC8,0x4F],0xF6:[0xC8,0x6F],
-    0xDC:[0xC8,0x55],0xFC:[0xC8,0x75],0xFF:[0xC8,0x79],
-    0xC7:[0xCB,0x43],0xE7:[0xCB,0x63],
-    0xC5:[0xCA,0x41],0xE5:[0xCA,0x61],
-    0x2026:[0x2E,0x2E,0x2E],
-    0x2013:[0x2D],0x2014:[0x2D],
-    0x2018:[0x27],0x2019:[0x27],
-    0x201C:[0x22],0x201D:[0x22],
-    0x2022:[0x2A],
-  };
+  const map={0xC0:[0xC1,0x41],0xE0:[0xC1,0x61],0xC8:[0xC1,0x45],0xE8:[0xC1,0x65],0xCC:[0xC1,0x49],0xEC:[0xC1,0x69],0xD2:[0xC1,0x4F],0xF2:[0xC1,0x6F],0xD9:[0xC1,0x55],0xF9:[0xC1,0x75],0xC1:[0xC2,0x41],0xE1:[0xC2,0x61],0xC9:[0xC2,0x45],0xE9:[0xC2,0x65],0xCD:[0xC2,0x49],0xED:[0xC2,0x69],0xD3:[0xC2,0x4F],0xF3:[0xC2,0x6F],0xDA:[0xC2,0x55],0xFA:[0xC2,0x75],0xDD:[0xC2,0x59],0xFD:[0xC2,0x79],0xC2:[0xC3,0x41],0xE2:[0xC3,0x61],0xCA:[0xC3,0x45],0xEA:[0xC3,0x65],0xCE:[0xC3,0x49],0xEE:[0xC3,0x69],0xD4:[0xC3,0x4F],0xF4:[0xC3,0x6F],0xDB:[0xC3,0x55],0xFB:[0xC3,0x75],0xC3:[0xC4,0x41],0xE3:[0xC4,0x61],0xD1:[0xC4,0x4E],0xF1:[0xC4,0x6E],0xD5:[0xC4,0x4F],0xF5:[0xC4,0x6F],0xC4:[0xC8,0x41],0xE4:[0xC8,0x61],0xCB:[0xC8,0x45],0xEB:[0xC8,0x65],0xCF:[0xC8,0x49],0xEF:[0xC8,0x69],0xD6:[0xC8,0x4F],0xF6:[0xC8,0x6F],0xDC:[0xC8,0x55],0xFC:[0xC8,0x75],0xFF:[0xC8,0x79],0xC7:[0xCB,0x43],0xE7:[0xCB,0x63],0xC5:[0xCA,0x41],0xE5:[0xCA,0x61],0x2026:[0x2E,0x2E,0x2E],0x2013:[0x2D],0x2014:[0x2D],0x2018:[0x27],0x2019:[0x27],0x201C:[0x22],0x201D:[0x22],0x2022:[0x2A]};
   const out=[];
-  for(let i=0;i<str.length;i++){
-    const c=str.charCodeAt(i);
-    if(c<0x80)out.push(c);
-    else if(map[c])for(const b of map[c])out.push(b);
-    else if(c<=0xFF)out.push(c);
-    else out.push(0x3F);
-  }
+  for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);if(c<0x80)out.push(c);else if(map[c])for(const b of map[c])out.push(b);else if(c<=0xFF)out.push(c);else out.push(0x3F);}
   return out;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 function msToFrames(ms,fps){
   const fExact=(fps==='23976')?24000/1001:30000/1001;
   const fMax=(fps==='23976')?24:30;
@@ -472,13 +503,14 @@ function msToFrames(ms,fps){
   return(exact>=fMax-0.5)?fMax-1:Math.round(exact)%fMax;
 }
 function pad2(n){return String(n).padStart(2,'0');}
-function formatBytes(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed(1)+' KB';return (b/1048576).toFixed(2)+' MB';}
+function formatBytes(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(2)+' MB';}
 function addLog(type,msg){
   const now=new Date();
   const ts=`${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
   const div=document.createElement('div');
-  div.className='log-line '+type;
-  div.innerHTML=`<span class="ts">${ts}</span><span class="msg">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+  div.className='log-line';
+  const cls=type==='ok'?'log-ok':type==='err'?'log-err':'log-info';
+  div.innerHTML=`<span class="log-ts">${ts}</span><span class="${cls}">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
   logBody.appendChild(div);
   logBody.scrollTop=logBody.scrollHeight;
 }
