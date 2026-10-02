@@ -102,10 +102,11 @@ h1 span{color:var(--accent);}
 .card-header{padding:9px 14px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);}
 
 /* ── FPS options ── */
-.fps-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;}
-.fps-opt{display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 12px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg);transition:border-color .15s,background .15s;user-select:none;}
+.fps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px;}
+.fps-opt{display:flex;align-items:center;justify-content:center;text-align:center;gap:8px;cursor:pointer;padding:8px 6px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg);transition:border-color .15s,background .15s;user-select:none;}
 .fps-opt:hover{border-color:var(--border2);}
 .fps-opt input{display:none;}
+.fps-grid .fps-radio{display:none;}
 .fps-radio{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--text3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s;}
 .fps-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .15s;}
 .fps-opt:has(input:checked){border-color:var(--accent);background:var(--accent-dim);}
@@ -317,7 +318,7 @@ td.content-col{cursor:text;}
       <div class="toprow">
         <div class="badges">
           <div class="badge">Avid SubCap</div>
-          <div class="badge badge-beta">v1.0.0 · Beta</div>
+          <div class="badge badge-beta">v1.1.0 · Beta</div>
         </div>
         <button class="theme-toggle" id="theme-toggle" title="Alternar tema">☀</button>
       </div>
@@ -333,10 +334,11 @@ td.content-col{cursor:text;}
     </div>
 
     <div class="card">
-      <div class="card-header">Frame rate</div>
+      <div class="card-header">Frame rate (fps)</div>
       <div class="fps-grid">
-        <label class="fps-opt"><input type="radio" name="fps" value="23976" checked><div class="fps-radio"></div><div><div class="fps-val">23.976 fps</div><div class="fps-sub">padrão</div></div></label>
-        <label class="fps-opt"><input type="radio" name="fps" value="2997df"><div class="fps-radio"></div><div><div class="fps-val">29.97 fps</div><div class="fps-sub">drop frame</div></div></label>
+        <label class="fps-opt"><input type="radio" name="fps" value="23976" checked><div class="fps-radio"></div><div><div class="fps-val">23.976</div><div class="fps-sub">padrão</div></div></label>
+        <label class="fps-opt"><input type="radio" name="fps" value="24"><div class="fps-radio"></div><div><div class="fps-val">24</div><div class="fps-sub">redondo</div></div></label>
+        <label class="fps-opt"><input type="radio" name="fps" value="2997df"><div class="fps-radio"></div><div><div class="fps-val">29.97 DF</div><div class="fps-sub">drop frame</div></div></label>
       </div>
     </div>
 
@@ -525,6 +527,15 @@ const fullDropOverlay=document.getElementById('full-drop-overlay');
 // ── Extra state ───────────────────────────────────────────────────────────────
 let currentFps='23976', density='cozy';
 
+// ── Frame rates ──────────────────────────────────────────────────────────────
+// num/den = edit rate do AAF; base = frames por segundo de timecode.
+const FPS_DEFS={
+  '23976': {label:'23.976 fps',   num:24000, den:1001, base:24, drop:false},
+  '24':    {label:'24 fps',       num:24,    den:1,    base:24, drop:false},
+  '2997df':{label:'29.97 fps DF', num:30000, den:1001, base:30, drop:true },
+};
+function fpsDef(k){return FPS_DEFS[k]||FPS_DEFS['23976'];}
+
 // ── TC math ──────────────────────────────────────────────────────────────────
 function tcToMs(tc){return((tc.h*3600+tc.m*60+tc.s)*1000)+tc.ms;}
 function msToTC(ms){if(ms<0)ms=0;return{h:Math.floor(ms/3600000),m:Math.floor((ms%3600000)/60000),s:Math.floor((ms%60000)/1000),ms:Math.floor(ms%1000)};}
@@ -637,7 +648,8 @@ function resetResults(){
 // ── Core: parse + classify ────────────────────────────────────────────────────
 async function parseFile(){
   const ext=loadedFile.name.split('.').pop().toLowerCase();
-  return ext==='stl'?parseSTL(await loadedFile.arrayBuffer()):parseSRT(await loadedFile.text());
+  const fps=document.querySelector('input[name="fps"]:checked').value;
+  return ext==='stl'?parseSTL(await loadedFile.arrayBuffer(),fps):parseSRT(await loadedFile.text());
 }
 
 function classify(subtitles,fps){
@@ -662,17 +674,36 @@ function classify(subtitles,fps){
   return generatedGroups.length>1;
 }
 
+// Legendas feitas num software de legendagem caem no grid de frames do vídeo:
+// cada tempo do SRT fica a ≤1 ms de um frame exato. Mede que fração dos tempos
+// cai no grid de cada frame rate. SRT cronometrado à mão não cai em grid nenhum
+// e não gera aviso. 23.976 e 24 se separam bem: o grid de um escorrega 1 frame a
+// cada 1000 frames em relação ao outro.
+function fpsGridScores(subtitles){
+  const times=subtitles.flatMap(s=>[tcToMs(s.tcIn),tcToMs(s.tcOut)]).filter(t=>t>=2000);
+  if(times.length<10)return null;
+  const scores={};
+  for(const k of Object.keys(FPS_DEFS)){
+    const d=fpsDef(k);
+    const msPerFrame=d.den*1000/d.num;
+    let hits=0;
+    for(const t of times){const x=t/msPerFrame;if(Math.abs(x-Math.round(x))*msPerFrame<=1)hits++;}
+    scores[k]=hits/times.length;
+  }
+  return scores;
+}
 function checkFps(subtitles,fps){
-  const frames=subtitles.flatMap(s=>[msToFrames(s.tcIn.ms,fps),msToFrames(s.tcOut.ms,fps)]);
-  const max=Math.max(...frames);
-  if(fps==='23976'&&max>=24){addLog('warn',`⚠ Frame máximo encontrado: ${max} — acima de 23. A legenda pode ter sido criada em 29.97 fps.`);return true;}
-  if(fps==='2997df'&&max<=23){addLog('warn',`⚠ Frame máximo encontrado: ${max} — todos ≤ 23. A legenda pode ter sido criada em 23.976 fps.`);return true;}
-  return false;
+  const scores=fpsGridScores(subtitles);
+  if(!scores||scores[fps]>=0.5)return false; // 23.976 e 29.97 coincidem a cada 4/5 frames (~25%)
+  const best=Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0];
+  if(scores[best]<0.8)return false;
+  addLog('warn',`⚠ Os tempos da legenda caem no grid de ${fpsDef(best).label} (${Math.round(scores[best]*100)}%), não no de ${fpsDef(fps).label}. Confira o frame rate.`);
+  return true;
 }
 
 function buildUI(subtitles,fps,multiStyle){
   const first=subtitles[0].tcIn;
-  tcVal.textContent=`${pad2(first.h)}:${pad2(first.m)}:${pad2(first.s)}:${pad2(msToFrames(first.ms,fps))}`;
+  tcVal.textContent=framesToTC(tcToFrames(first,fps),fps);
   tcNote.textContent=first.h===0?'Timeline provavelmente começa em zero — confirme antes de importar.':`Timeline provavelmente começa em ${pad2(first.h)}:00:00:00 — confirme antes de importar.`;
   tcInfo.style.display='block';
 
@@ -729,7 +760,7 @@ btnVisualize.addEventListener('click',async()=>{
     setProgress(20);
     const subs=await parseFile();
     if(!subs||subs.length===0)throw new Error('Nenhuma legenda encontrada.');
-    addLog('info',`${subs.length} legendas · ${fps==='23976'?'23.976':'29.97'} fps`);
+    addLog('info',`${subs.length} legendas · ${fpsDef(fps).label}`);
     setProgress(40);
     const warn=checkFps(subs,fps);
     const needsControl=classify(subs,fps);
@@ -758,7 +789,7 @@ btnConvert.addEventListener('click',async()=>{
     setProgress(20);
     const subs=await parseFile();
     if(!subs||subs.length===0)throw new Error('Nenhuma legenda encontrada.');
-    addLog('info',`${subs.length} legendas · ${fps==='23976'?'23.976':'29.97'} fps`);
+    addLog('info',`${subs.length} legendas · ${fpsDef(fps).label}`);
     setProgress(40);
     checkFps(subs,fps);
     const needsControl=classify(subs,fps);
@@ -776,7 +807,7 @@ function collapsePreview(){appEl.classList.remove('expanded');}
 btnClosePreview.addEventListener('click',collapsePreview);
 
 function buildPreview(fps,hasFpsWarn){
-  const fpsLabel=fps==='23976'?'23.976 fps':'29.97 fps DF';
+  const fpsLabel=fpsDef(fps).label;
   fpsBadgeWrap.innerHTML=`<div class="fps-badge${hasFpsWarn?' fps-badge-warn':''}">Frame rate: <strong>${fpsLabel}</strong>${hasFpsWarn?' &nbsp;⚠ possível incompatibilidade':''}</div>`;
 
   renderStats();
@@ -824,8 +855,8 @@ function renderTable(fps){
   previewBody.innerHTML=rows.map((sub,i)=>{
     const def=DEF_MAP[sub.groupKey];
     const col=COLOR_MAP[sub.groupKey]||'#888';
-    const ti=`${pad2(sub.tcIn.h)}:${pad2(sub.tcIn.m)}:${pad2(sub.tcIn.s)}:${pad2(msToFrames(sub.tcIn.ms,fps))}`;
-    const to=`${pad2(sub.tcOut.h)}:${pad2(sub.tcOut.m)}:${pad2(sub.tcOut.s)}:${pad2(msToFrames(sub.tcOut.ms,fps))}`;
+    const ti=framesToTC(tcToFrames(sub.tcIn,fps),fps);
+    const to=framesToTC(tcToFrames(sub.tcOut,fps),fps);
     const html=sub.lines.map(l=>{
       let s=escHtml(l);
       if(q)s=s.replace(new RegExp('('+escRe(q)+')','gi'),'<mark class="hl">$1</mark>');
@@ -873,21 +904,29 @@ function parseSRT(text){
   }
   return subs;
 }
-function parseSTL(buffer){
+// EBU Tech 3264. O STL guarda timecode (não tempo real): converte o rótulo em
+// frames no fps escolhido e daí para o tempo real que o resto do app usa, para
+// que tcToFrames devolva exatamente o frame do STL.
+function parseSTL(buffer,fpsKey){
   const buf=new Uint8Array(buffer);const subs=[];const n=Math.floor((buf.length-1024)/128);
+  const d=fpsDef(fpsKey);
+  const toTc=(h,m,s,f)=>msToTC(tcPartsToFrames(h,m,s,f,fpsKey)*d.den*1000/d.num);
   for(let i=0;i<n;i++){
     const o=1024+i*128;
-    const mI=buf[o+6],sI=buf[o+7],fI=buf[o+8],mO=buf[o+10],sO=buf[o+11],fO=buf[o+12];
-    const tf=buf.slice(o+16,o+128);const lines=[];let line='';
+    if(buf[o+3]===0xFE||buf[o+15]===0x01)continue; // bloco de dados de usuário / comentário
+    const tf=buf.slice(o+16,o+128);const lines=[];let line='',hasItalic=false;
     for(let j=0;j<tf.length;j++){
       const b=tf[j];if(b===0x8F)break;
       if(b===0x8A){lines.push(line);line='';continue;}
+      if(b===0x80){hasItalic=true;continue;}
+      if(b<0x20||(b>=0x80&&b<=0x9F))continue; // códigos de controle (cor, sublinhado, caixa...)
       if(b>=0xC0&&b<=0xCF&&j+1<tf.length&&tf[j+1]!==0x8F){line+=iso6937Decode(b,tf[j+1]);j++;continue;}
       line+=String.fromCharCode(b);
     }
-    if(line.length>0)lines.push(line);
-    if(!lines.length)continue;
-    subs.push({tcIn:{h:0,m:mI,s:sI,ms:Math.round((fI/24)*1000)},tcOut:{h:0,m:mO,s:sO,ms:Math.round((fO/24)*1000)},lines,hasItalic:false,hasBold:false,hasTop:false,hasUnknown:false});
+    lines.push(line);
+    const textLines=lines.map(l=>l.trim()).filter(l=>l.length);
+    if(!textLines.length)continue;
+    subs.push({tcIn:toTc(buf[o+5],buf[o+6],buf[o+7],buf[o+8]),tcOut:toTc(buf[o+9],buf[o+10],buf[o+11],buf[o+12]),lines:textLines,hasItalic,hasBold:false,hasTop:false,hasUnknown:false});
   }
   return subs;
 }
@@ -905,9 +944,26 @@ function groupKey(sub){
   if(!i&&!b&&t)return'top';if(i&&b&&!t)return'italic_bold';if(i&&!b&&t)return'italic_top';
   if(!i&&b&&t)return'bold_top';return'italic_bold_top';
 }
-function msToFrames(ms,fps){
-  const fE=(fps==='23976')?24000/1001:30000/1001,fM=(fps==='23976')?24:30;
-  const x=(ms/1000)*fE;return(x>=fM-.5)?fM-1:Math.round(x)%fM;
+// Contagem de frames -> "HH:MM:SS:FF" (drop frame: "HH:MM:SS;FF").
+function framesToTC(frames,fpsKey){
+  const d=fpsDef(fpsKey);
+  let f=Math.max(0,frames);
+  if(d.drop){ // 29.97 DF: pula os rótulos :00 e :01 de cada minuto, menos os múltiplos de 10
+    const per10=17982,per1=1798;
+    const tens=Math.floor(f/per10),rem=f%per10;
+    f+=18*tens+(rem>2?2*Math.floor((rem-2)/per1):0);
+  }
+  const b=d.base;
+  const ff=f%b,ss=Math.floor(f/b)%60,mm=Math.floor(f/(b*60))%60,hh=Math.floor(f/(b*3600));
+  return `${pad2(hh)}:${pad2(mm)}:${pad2(ss)}${d.drop?';':':'}${pad2(ff)}`;
+}
+// Rótulo de timecode -> contagem de frames (inverso de framesToTC).
+function tcPartsToFrames(h,m,s,f,fpsKey){
+  const d=fpsDef(fpsKey);
+  const totalMin=h*60+m;
+  let n=(totalMin*60+s)*d.base+f;
+  if(d.drop)n-=2*(totalMin-Math.floor(totalMin/10));
+  return n;
 }
 function isDark(hex){
   const c=(hex||'').replace('#','');if(c.length!==6)return true;
@@ -1003,7 +1059,7 @@ async function ensurePyodide(onStatus){
     await py.loadPackage('micropip');
     await py.runPythonAsync(`
 import micropip
-await micropip.install("pyaaf2")
+await micropip.install("pyaaf2==1.7.1")
 import aaf2
 `);
     return py;
@@ -1014,6 +1070,7 @@ import aaf2
 // Python generator. Embedded as a template literal — no backticks inside.
 const PY_AAF_GEN = `
 import aaf2, struct, json
+from fractions import Fraction
 
 PID_PARAMS = 2819
 PID_VALUE = 19713
@@ -1177,12 +1234,39 @@ def adjust_other_slots(comp, pic_slot, total_length):
         except Exception:
             pass
 
-def generate(subs_json, mode):
+TEMPLATE_RATE = (24000, 1001)
+
+def apply_rate(comp, rate):
+    # O template foi exportado de um projeto 23.976 de filme: além do TC1 tem
+    # TCs auxiliares, pulldowns e edgecode amarrados a 24 quadros de película.
+    # Em 23.976 ele segue intacto (é o caminho validado no Avid). Nas outras
+    # taxas fica só o essencial — TC1, imagem e master de som — na taxa nova.
+    num, den = rate['num'], rate['den']
+    if (num, den) == TEMPLATE_RATE:
+        return
+    keep = []
+    for s in comp.slots:
+        seg = s.segment
+        is_tc1 = (type(seg).__name__ == 'Timecode'
+                  and 'PhysicalTrackNumber' in s.keys()
+                  and s['PhysicalTrackNumber'].value == 1)
+        if s.media_kind in ('Picture', 'SoundMasterTrack') or is_tc1:
+            keep.append(s)
+    comp.slots.value = keep
+    for s in comp.slots:
+        s.edit_rate = Fraction(num, den)
+        if type(s.segment).__name__ == 'Timecode':
+            s.segment.fps = rate['base']
+            s.segment.drop = bool(rate['drop'])
+
+def generate(subs_json, mode, rate_json):
     subs = json.loads(subs_json)
+    rate = json.loads(rate_json)
     with open('/tmp/in.aaf', 'rb') as fi, open('/tmp/out.aaf', 'wb') as fo:
         fo.write(fi.read())
     with aaf2.open('/tmp/out.aaf', 'r+') as f:
         comp = list(f.content.toplevel())[0]
+        apply_rate(comp, rate)
         pic_slot = None
         for s in comp.slots:
             if s.media_kind == 'Picture':
@@ -1220,9 +1304,10 @@ def generate(subs_json, mode):
         else:
             normal_subs = [s for s in subs if not s.get('italic')]
             italic_subs = [s for s in subs if s.get('italic')]
-            v1 = seq
+            # A sequence do template ainda está presa ao slot: um objeto do pyaaf2
+            # só pode ter um dono, então V1 também nasce nova.
+            v1 = f.create.Sequence(media_kind='picture', length=total_length)
             v1.components.value = build_components(f, normal_tpl, normal_subs, total_length)
-            v1.length = total_length
             v2 = f.create.Sequence(media_kind='picture', length=total_length)
             v2.components.value = build_components(f, italic_tpl, italic_subs, total_length)
             nested = f.create.NestedScope(media_kind='picture', length=total_length)
@@ -1234,10 +1319,30 @@ def generate(subs_json, mode):
         return f.read()
 `;
 
+// Tempo do SRT (tempo real) -> frame na timeline.
 function tcToFrames(tc, fpsKey){
-  const totalMs = ((tc.h*3600 + tc.m*60 + tc.s)*1000) + tc.ms;
-  const fps = (fpsKey === '23976') ? 24000/1001 : 30000/1001;
-  return Math.round(totalMs/1000 * fps);
+  const d = fpsDef(fpsKey);
+  return Math.round(tcToMs(tc) * d.num / (d.den * 1000));
+}
+
+// Numa track, um clip não pode começar antes do anterior acabar: o gerador
+// emenda os clips em sequência, e uma sobreposição empurraria todos os
+// seguintes para frente. Ordena e encurta a saída até a entrada da próxima.
+function fitTrack(track){
+  track.sort((a, b) => a.start_frame - b.start_frame);
+  let trimmed = 0;
+  for(let i = 0; i < track.length - 1; i++){
+    const cur = track[i], next = track[i+1];
+    if(next.start_frame <= cur.start_frame){ // mesma entrada: a primeira fica com 1 frame
+      const shift = cur.start_frame + 1 - next.start_frame;
+      next.start_frame += shift;
+      next.length_frames -= shift;
+    }
+    const maxLen = next.start_frame - cur.start_frame;
+    if(cur.length_frames > maxLen){ cur.length_frames = maxLen; trimmed++; }
+  }
+  for(const s of track) s.length_frames = Math.max(1, s.length_frames);
+  return trimmed;
 }
 
 async function generateAAF(){
@@ -1252,22 +1357,28 @@ async function generateAAF(){
     const tpl = decodeAafTemplate();
     py.FS.writeFile('/tmp/in.aaf', tpl);
 
-    const subs = allSubtitles.map(s => ({
+    const all = allSubtitles.map(s => ({
       start_frame: tcToFrames(s.tcIn, fpsKey),
       length_frames: Math.max(1, tcToFrames(s.tcOut, fpsKey) - tcToFrames(s.tcIn, fpsKey)),
       text: s.lines.join('\r\n'),
       italic: !!s.hasItalic,
     }));
+    const tracks = mode === 'dual' ? [all.filter(s => !s.italic), all.filter(s => s.italic)] : [all];
+    const trimmed = tracks.reduce((n, t) => n + fitTrack(t), 0);
+    if(trimmed) addLog('warn', `${trimmed} legenda${trimmed!==1?'s':''} sobreposta${trimmed!==1?'s':''} na mesma track — a saída foi encurtada até a entrada da seguinte.`);
+    const subs = tracks.flat();
+    const fd = fpsDef(fpsKey);
     py.globals.set('SUBS_JSON', JSON.stringify(subs));
     py.globals.set('MODE', mode);
+    py.globals.set('RATE', JSON.stringify({num: fd.num, den: fd.den, base: fd.base, drop: fd.drop}));
 
     setDlStatus(`Gerando AAF (${subs.length} legendas, modo ${mode})...`, 'working');
     await py.runPythonAsync(PY_AAF_GEN);
-    const result = await py.runPythonAsync('generate(SUBS_JSON, MODE)');
+    const result = await py.runPythonAsync('generate(SUBS_JSON, MODE, RATE)');
     const bytes = result.toJs({create_proxies: false});
     if(result.destroy) result.destroy();
 
-    const fn = `${baseName||'legendas'}_${mode==='dual'?'2tracks':'1track'}.aaf`;
+    const fn = `${baseName||'legendas'}_${fpsKey}_${mode==='dual'?'2tracks':'1track'}.aaf`;
     dlFile(new Blob([bytes], {type:'application/octet-stream'}), fn);
     const elapsed = ((performance.now()-startedAt)/1000).toFixed(1);
     setDlStatus(`✓ ${fn} (${formatBytes(bytes.length)}) — ${elapsed}s`, 'ok');

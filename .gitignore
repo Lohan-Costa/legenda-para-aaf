@@ -1,0 +1,14 @@
+# Memória de desenvolvimento: fica no SSD, não vai para o repositório público
+# (o repo é público e serve o GitHub Pages direto da raiz).
+CLAUDE.md
+HANDOFF.md
+.claude/
+.dev/
+
+# macOS / exFAT
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.pyc
